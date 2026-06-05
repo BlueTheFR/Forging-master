@@ -266,17 +266,17 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
   <!-- Forge Area -->
   <div id="forge-area">
     <div id="forge-header">
-      <div id="forge-level">⚒ Forge Lv.<span id="forge-lv">1</span></div>
+      <div id="forge-level"><span id="forge-lv-label">⚒ Forge Lv.</span> <span id="forge-lv">1</span></div>
       <div id="forge-probs"></div>
     </div>
     <div id="forge-xp-bar"><div class="fill" id="forge-xp-fill" style="width:0%"></div></div>
-    <div id="forge-xp-text">XP: <span id="forge-xp">0</span> / <span id="forge-xp-next">100</span></div>
-    <div id="upgrade-timer">⬆ Upgrading... <span id="upgrade-time">5:00</span></div>
+    <div id="forge-xp-text"><span id="forge-xp-label">XP:</span> <span id="forge-xp">0</span> / <span id="forge-xp-next">100</span></div>
+    <div id="upgrade-timer"><span id="upgrade-timer-label">⬆ Upgrading...</span> <span id="upgrade-time">5:00</span></div>
     <div id="forge-btn-row">
-      <button id="forge-btn" onclick="forgeItem()">⚒ Forge</button>
-      <button id="auto-forge-btn" onclick="toggleAutoForge()">🔄 Auto</button>
+      <button id="forge-btn" onclick="forgeItem()"></button>
+      <button id="auto-forge-btn" onclick="toggleAutoForge()"></button>
     </div>
-    <button id="forge-upgrade-btn" onclick="startUpgrade()">⬆ Upgrade Forge (cost: <span id="upgrade-cost">0</span> XP)</button>
+    <button id="forge-upgrade-btn" onclick="startUpgrade()"><span id="upgrade-btn-label">⬆ Upgrade Forge</span> (<span id="upgrade-cost-label"><span id="upgrade-cost">0</span> XP</span>)</button>
     <div id="auto-filter-row"><span style="font-size:9px;color:#555;margin-right:4px">Auto min:</span></div>
     <div id="item-preview"><div class="no-item">Forge an item to see it here</div></div>
   </div>
@@ -284,12 +284,12 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
   <!-- Stats Popup -->
   <div id="stats-popup">
     <div class="close-btn" onclick="toggleStats()">✕</div>
-    <h2>Character Stats</h2>
+    <h2 id="stats-popup-title">Character Stats</h2>
     <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-      <input id="name-input" type="text" maxlength="20" style="flex:1;padding:4px 8px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#ddd;font-size:12px" value="Forging Master" oninput="setName(this.value)">
+      <input id="name-input" type="text" maxlength="20" style="flex:1;padding:4px 8px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#ddd;font-size:12px" oninput="setName(this.value)">
       <select id="gender-select" style="padding:4px 8px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#ddd;font-size:12px;cursor:pointer" onchange="setGender(this.value)">
-        <option value="male">🧑 Male</option>
-        <option value="female">👩 Female</option>
+        <option id="gender-male" value="male">🧑 Male</option>
+        <option id="gender-female" value="female">👩 Female</option>
       </select>
     </div>
     <div class="stats-grid" id="stats-grid"></div>
@@ -302,7 +302,7 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
   <!-- Chat Panel -->
   <div id="chat-panel">
     <div class="chat-header">
-      <h3>💬 Chat</h3>
+      <h3 id="chat-header-title">💬 Chat</h3>
       <span class="chat-close" onclick="toggleChat()">✕</span>
     </div>
     <div id="chat-messages"></div>
@@ -334,28 +334,108 @@ const RARITIES = [
   { name:'Absolute', substats:10, cap:2.50, minForgeLv:48, rarityWeight:0.056 },
 ];
 const SUBSTATS = [
-  { id:'attackSpeed', name:'Attack Speed', suffix:'%' },
-  { id:'comboChance', name:'Combo Chance', suffix:'%' },
-  { id:'lifestealChance', name:'Lifesteal', suffix:'%' },
-  { id:'bonusDamage', name:'Bonus DMG', suffix:'' },
-  { id:'blockChance', name:'Block Chance', suffix:'%' },
-  { id:'evadeChance', name:'Evade Chance', suffix:'%' },
-  { id:'hpRegen', name:'HP Regen', suffix:'/s' },
+  { id:'attackSpeed', name:'Attack Speed', nameFr:'Vitesse d\'Attaque', suffix:'%' },
+  { id:'comboChance', name:'Combo Chance', nameFr:'Chance Combo', suffix:'%' },
+  { id:'lifestealChance', name:'Lifesteal', nameFr:'Vol de Vie', suffix:'%' },
+  { id:'bonusDamage', name:'Bonus DMG', nameFr:'Dégâts Bonus', suffix:'' },
+  { id:'blockChance', name:'Block Chance', nameFr:'Chance Blocage', suffix:'%' },
+  { id:'evadeChance', name:'Evade Chance', nameFr:'Chance Esquive', suffix:'%' },
+  { id:'hpRegen', name:'HP Regen', nameFr:'Régénération PV', suffix:'/s' },
 ];
 const WEAPON_STYLES = [
-  { id:'melee', icon:'🗡️', label:'Melee', dmgMult:1.0, range:false },
-  { id:'ranged', icon:'🏹', label:'Ranged', dmgMult:0.7, range:true },
+  { id:'melee', icon:'🗡️', label:'Melee', labelFr:'Mêlée', dmgMult:1.0, range:false },
+  { id:'ranged', icon:'🏹', label:'Ranged', labelFr:'Distance', dmgMult:0.7, range:true },
 ];
 const ITEM_TYPES = [
-  { id:'helmet', icon:'🪖', label:'Helmet', unlockWave:0, category:'armor' },
-  { id:'chestplate', icon:'🛡️', label:'Chestplate', unlockWave:0, category:'armor' },
-  { id:'gloves', icon:'🧤', label:'Gloves', unlockWave:0, category:'armor' },
-  { id:'belt', icon:'🔗', label:'Belt', unlockWave:0, category:'armor' },
-  { id:'boots', icon:'👢', label:'Boots', unlockWave:0, category:'armor' },
-  { id:'weapon', icon:'⚔️', label:'Weapon', unlockWave:0, category:'weapon' },
-  { id:'amulet', icon:'📿', label:'Amulet', unlockWave:50, category:'armor' },
-  { id:'ring', icon:'💍', label:'Ring', unlockWave:100, category:'armor' },
+  { id:'helmet', icon:'🪖', label:'Helmet', labelFr:'Casque', unlockWave:0, category:'armor' },
+  { id:'chestplate', icon:'🛡️', label:'Chestplate', labelFr:'Plastron', unlockWave:0, category:'armor' },
+  { id:'gloves', icon:'🧤', label:'Gloves', labelFr:'Gants', unlockWave:0, category:'armor' },
+  { id:'belt', icon:'🔗', label:'Belt', labelFr:'Ceinture', unlockWave:0, category:'armor' },
+  { id:'boots', icon:'👢', label:'Boots', labelFr:'Bottes', unlockWave:0, category:'armor' },
+  { id:'weapon', icon:'⚔️', label:'Weapon', labelFr:'Arme', unlockWave:0, category:'weapon' },
+  { id:'amulet', icon:'📿', label:'Amulet', labelFr:'Amulette', unlockWave:50, category:'armor' },
+  { id:'ring', icon:'💍', label:'Ring', labelFr:'Anneau', unlockWave:100, category:'armor' },
 ];
+
+// ========== I18N ==========
+const LANG_STRINGS = {
+  en: {
+    playerName:'Forging Master', wave:'Wave', level:'Level', enemiesLeft:'enemies left', combatPower:'Combat Power',
+    male:'Male', female:'Female',
+    forgeLevel:'⚒ Forge Lv.', xp:'XP:', upgrade:'⬆ Upgrade Forge', cost:'cost:', max:'MAX',
+    upgrading:'⬆ Upgrading...', forge:'⚒ Forge', auto:'🔄 Auto', autoMin:'Auto min:',
+    forgeForItem:'Forge an item to see it here', betterFound:'Better {slot} found!', newForged:'New {slot} forged!',
+    melee:'Melee', ranged:'Ranged', rangeLabel:'Range', firstStrike:'First Strike',
+    defeated:'Defeated! Restarting wave.', waveCleared:'Wave {n} cleared! ({c} enemies)',
+    combo:'Combo! {dmg} dmg ({hits}x)', missed:'Missed!',
+    bossSlain:'BOSS {n} slain! +{xp} XP', enemySlain:'Enemy {n} slain! +{xp} XP',
+    boss:'BOSS', enemy:'Enemy',
+    empty:'Empty', equipped:'Equipped', locked:'Locked',
+    equip:'Equip', unequip:'Unequip', discard:'Discard', close:'Close',
+    charStats:'Character Stats', resetConfirm:'Reset all progress?',
+    statAtk:'Attack', statBonusDmg:'Bonus DMG', statMaxHp:'Max HP', statArmorHp:'Armor HP',
+    statHpRegen:'HP Regen', statAtkSpd:'Attack Speed', statCombo:'Combo Chance',
+    statLifesteal:'Lifesteal', statBlock:'Block Chance', statEvade:'Evade Chance', statItemPower:'Item Power',
+    hp:'HP', dmg:'DMG',
+    // substats (display names)
+    sAttackSpeed:'Attack Speed', sComboChance:'Combo Chance', sLifestealChance:'Lifesteal',
+    sBonusDamage:'Bonus DMG', sBlockChance:'Block Chance', sEvadeChance:'Evade Chance', sHpRegen:'HP Regen',
+    // rarities
+    rCommon:'Common', rUncommon:'Uncommon', rRare:'Rare', rEpic:'Epic', rLegendary:'Legendary',
+    rMythic:'Mythic', rAscended:'Ascended', rTranscendent:'Transcendent', rEternal:'Eternal',
+    rCosmic:'Cosmic', rVoid:'Void', rAstral:'Astral', rDivine:'Divine', rOmega:'Omega', rAbsolute:'Absolute',
+    // chat
+    chat:'Chat', send:'Send', msgPlaceholder:'Type a message...',
+    connecting:'Connecting to server...', connected:'Connected', disconnected:'Disconnected. Reconnecting...',
+    serverUnavail:'Server unavailable. Retrying...',
+    loading:'Loading {name}...', offline:'{name} is offline', online:'online',
+    equippedItems:'Equipped Items', noItems:'No items equipped',
+    joined:'{name} joined the game!', left:'{name} left the game.',
+    // stats popup labels
+    labelCombatPower:'Combat Power', labelForgeLevel:'Forge Level', labelWave:'Wave',
+  },
+  fr: {
+    playerName:'Maître Forgeron', wave:'Vague', level:'Niveau', enemiesLeft:'ennemis restants', combatPower:'Puissance de Combat',
+    male:'Masculin', female:'Féminin',
+    forgeLevel:'⚒ Forge Niv.', xp:'XP:', upgrade:'⬆ Améliorer la Forge', cost:'coût:', max:'MAX',
+    upgrading:'⬆ Amélioration...', forge:'⚒ Forger', auto:'🔄 Auto', autoMin:'Min auto:',
+    forgeForItem:'Forge un objet pour le voir ici', betterFound:'Meilleur {slot} trouvé !', newForged:'Nouveau {slot} forgé !',
+    melee:'Mêlée', ranged:'Distance', rangeLabel:'Portée', firstStrike:'Frappe Prioritaire',
+    defeated:'Vaincu ! Redémarrage de la vague.', waveCleared:'Vague {n} terminée ! ({c} ennemis)',
+    combo:'Combo ! {dmg} dégâts ({hits}x)', missed:'Raté !',
+    bossSlain:'BOSS {n} tué ! +{xp} XP', enemySlain:'Ennemi {n} tué ! +{xp} XP',
+    boss:'BOSS', enemy:'Ennemi',
+    empty:'Vide', equipped:'Équipé', locked:'Verrouillé',
+    equip:'Équiper', unequip:'Déséquiper', discard:'Jeter', close:'Fermer',
+    charStats:'Stats du Personnage', resetConfirm:'Réinitialiser toute la progression ?',
+    statAtk:'Attaque', statBonusDmg:'Dégâts Bonus', statMaxHp:'PV Max', statArmorHp:'PV Armure',
+    statHpRegen:'Régénération PV', statAtkSpd:'Vitesse d\'Attaque', statCombo:'Chance Combo',
+    statLifesteal:'Vol de Vie', statBlock:'Chance Blocage', statEvade:'Chance Esquive', statItemPower:'Puissance d\'Objet',
+    hp:'PV', dmg:'DÉG',
+    sAttackSpeed:'Vitesse d\'Attaque', sComboChance:'Chance Combo', sLifestealChance:'Vol de Vie',
+    sBonusDamage:'Dégâts Bonus', sBlockChance:'Chance Blocage', sEvadeChance:'Chance Esquive', sHpRegen:'Régénération PV',
+    rCommon:'Commun', rUncommon:'Peu Commun', rRare:'Rare', rEpic:'Épique', rLegendary:'Légendaire',
+    rMythic:'Mythique', rAscended:'Ascendu', rTranscendent:'Transcendant', rEternal:'Éternel',
+    rCosmic:'Cosmique', rVoid:'Néant', rAstral:'Astral', rDivin:'Divin', rOmega:'Oméga', rAbsolute:'Absolu',
+    chat:'Discussion', send:'Envoyer', msgPlaceholder:'Tapez un message...',
+    connecting:'Connexion au serveur...', connected:'Connecté', disconnected:'Déconnecté. Reconnexion...',
+    serverUnavail:'Serveur indisponible. Nouvelle tentative...',
+    loading:'Chargement de {name}...', offline:'{name} est hors ligne', online:'en ligne',
+    equippedItems:'Objets Équipés', noItems:'Aucun objet équipé',
+    joined:'{name} a rejoint le jeu !', left:'{name} a quitté le jeu.',
+    labelCombatPower:'Puissance de Combat', labelForgeLevel:'Niveau de Forge', labelWave:'Vague',
+  }
+};
+const LANG = (navigator.language||'').startsWith('fr')?'fr':'en';
+function t(key, vars) {
+  let s = (LANG_STRINGS[LANG]&&LANG_STRINGS[LANG][key])||LANG_STRINGS.en[key]||key;
+  if (vars) for (const [k,v] of Object.entries(vars)) s = s.replace(`{${k}}`, v);
+  return s;
+}
+function tl(item) { return item.labelFr && LANG === 'fr' ? item.labelFr : item.label; }
+function tn(rarityName) { const m={Common:'rCommon',Uncommon:'rUncommon',Rare:'rRare',Epic:'rEpic',Legendary:'rLegendary',Mythic:'rMythic',Ascended:'rAscended',Transcendent:'rTranscendent',Eternal:'rEternal',Cosmic:'rCosmic',Void:'rVoid',Astral:'rAstral',Divine:'rDivine',Omega:'rOmega',Absolute:'rAbsolute'}; return t(m[rarityName]||rarityName); }
+function ts(substatId) { const m={attackSpeed:'sAttackSpeed',comboChance:'sComboChance',lifestealChance:'sLifestealChance',bonusDamage:'sBonusDamage',blockChance:'sBlockChance',evadeChance:'sEvadeChance',hpRegen:'sHpRegen'}; return t(m[substatId]||substatId); }
+function ti(item) { return LANG==='fr'&&item.typeLabelFr?item.typeLabelFr:item.typeLabel; }
 
 function getUpgradeTime(lv){
   if(lv<10)return 10;
@@ -397,7 +477,7 @@ function rand(a,b){return Math.random()*(b-a)+a}
 function randInt(a,b){return Math.floor(rand(a,b+1))}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function pick(a){return a[randInt(0,a.length-1)]}
-function setName(v){G.playerName=v||'Forging Master';render();if(chatConnected)sendChatUpdate()}
+function setName(v){G.playerName=v||t('playerName');render();if(chatConnected)sendChatUpdate()}
 function setGender(v){G.gender=v;document.getElementById('char-avatar').textContent=v==='female'?'👩':'⚒';renderStatsPopup();if(chatConnected)sendChatUpdate()}
 
 function rarityColor(r){const m={Common:'#aaa',Uncommon:'#2ecc71',Rare:'#3498db',Epic:'#9b59b6',Legendary:'#f39c12',Mythic:'#e94560',Ascended:'#00d2ff',Transcendent:'#ff6bff',Eternal:'#ff4440',Cosmic:'#a78bfa',Void:'#06b6d4',Astral:'#fb923c',Divine:'#facc15',Omega:'#f87171',Absolute:'#ffffff'};return m[r]||'#aaa'}
@@ -444,9 +524,9 @@ function rollRarity(){
 function generateItem(){
   const types=ITEM_TYPES.filter(t=>G.wave>=t.unlockWave),type=pick(types);
   const rarity=rollRarity(),itemLv=Math.max(1,G.forgeLv+randInt(-1,2)),ri=RARITIES.indexOf(rarity);
-  const item={type:type.id,typeLabel:type.label,icon:type.icon,rarity:rarity.name,rarityIndex:ri,level:itemLv,substats:[],hp:0,damage:0,weaponStyle:null,range:false};
+  const item={type:type.id,typeLabel:type.label,typeLabelFr:type.labelFr||type.label,icon:type.icon,rarity:rarity.name,rarityIndex:ri,level:itemLv,substats:[],hp:0,damage:0,weaponStyle:null,range:false};
   if(type.category==='weapon'){
-    const ws=pick(WEAPON_STYLES);item.weaponStyle=ws.id;item.icon=ws.icon;item.typeLabel=ws.label;
+    const ws=pick(WEAPON_STYLES);item.weaponStyle=ws.id;item.icon=ws.icon;item.typeLabel=ws.label;item.typeLabelFr=ws.labelFr||ws.label;
     item.damage=Math.round(itemLv*BASE_ITEM_DMG*(0.8+(ri+1)*ws.dmgMult*0.4));item.range=ws.range;
   } else {
     item.hp=Math.round(itemLv*BASE_ITEM_HP*(0.8+(ri+1)*0.15));
@@ -469,7 +549,7 @@ function getCharacterStats(){
   return s;
 }
 
-function getItemMainStat(item){if(!item)return{label:'',value:0};if(item.weaponStyle)return{label:item.weaponStyle==='ranged'?'🏹 Ranged':'⚔ Melee',value:item.damage};return{label:'❤ HP',value:item.hp}}
+function getItemMainStat(item){if(!item)return{label:'',value:0};if(item.weaponStyle){const wsl=item.weaponStyle==='ranged'?t('ranged'):t('melee');return{label:item.weaponStyle==='ranged'?'🏹 '+wsl:'⚔ '+wsl,value:item.damage}}return{label:'❤ '+t('hp'),value:item.hp}}
 
 function getTotalItemPower(){let t=0;for(const s of Object.values(G.equipped))if(s)t+=getItemPower(s);return t}
 
@@ -528,7 +608,8 @@ function updateAutoForge(dt){
       const slot=G.currentItem.type,cur=G.equipped[slot];
       if(!cur||G.currentItem.power>(cur.power||0)){
         G.autoForge=false;
-        G.log=cur?`Better ${slot} found!`:`New ${slot} forged!`;
+        const typ2=ITEM_TYPES.find(t=>t.id===slot);const slotName2=typ2?tl(typ2):slot;
+        G.log=cur?t('betterFound',{slot:slotName2}):t('newForged',{slot:slotName2});
         render();
       } else {
         discardCurrentItem();
@@ -638,14 +719,14 @@ function combatTick(dt){
 
   if(G.charHp<=0){
     G.charHp=G.charMaxHp;initWave();
-    G.log='Defeated! Restarting wave.';return;
+    G.log=t('defeated');return;
   }
 
   // Check if all enemies dead
   const aliveCount=G.enemies.filter(e=>e.alive).length;
   if(aliveCount===0){
     G.wave++;G.totalWavesCleared++;
-    G.log=`Wave ${G.wave-1} cleared! (${G.enemiesThisWave} enemies)`;
+    G.log=t('waveCleared',{n:G.wave-1,c:G.enemiesThisWave});
     initWave();
     return;
   }
@@ -675,15 +756,15 @@ function combatTick(dt){
           target.alive=false;target.hp=0;
           const xp=target.isBoss?G.wave*2:G.wave;
           G.forgeXp+=xp;
-          G.log=target.isBoss?`BOSS ${target.id+1} slain! +${xp} XP`:`Enemy ${target.id+1} slain! +${xp} XP`;
+          G.log=target.isBoss?t('bossSlain',{n:target.id+1,xp}):t('enemySlain',{n:target.id+1,xp});
         }
-        else{G.log=hits>1?`Combo! ${total} dmg (${hits}x)`:`${total} dmg`}
+        else{G.log=hits>1?t('combo',{dmg:total,hits}):`${total} dmg`}
         const ls=stats.lifestealChance||0;if(Math.random()*100<ls)G.charHp=Math.min(G.charMaxHp,G.charHp+Math.round(total*rand(0.1,0.3)));
         G.charAttackAnim=1;
         if(G.hasRanged)G.projectiles.push({fromX:G.playerX,toX:target.x,progress:0,speed:4});
       }
     } else {
-      G.log='Missed!';
+      G.log=t('missed');
     }
   }
 
@@ -714,43 +795,47 @@ function render(){
   document.getElementById('wave-num').textContent=G.wave;
 
   const needed=forgeXpForLevel(G.forgeLv);
+  document.getElementById('forge-lv-label').textContent=t('forgeLevel');
   document.getElementById('forge-lv').textContent=G.forgeLv;
   document.getElementById('forge-xp-fill').style.width=Math.min(100,(G.forgeXp/needed)*100)+'%';
+  const xpLbl=document.getElementById('forge-xp-label');if(xpLbl)xpLbl.textContent=t('xp');
   document.getElementById('forge-xp').textContent=G.forgeXp;
   document.getElementById('forge-xp-next').textContent=needed;
   const atMax=G.forgeLv>=MAX_FORGE_LV;
   document.getElementById('forge-upgrade-btn').disabled=atMax||G.isUpgrading||G.forgeXp<needed;
-  document.getElementById('upgrade-cost').textContent=atMax?'MAX':needed;
+  document.getElementById('upgrade-btn-label').textContent=t('upgrade');
+  document.getElementById('upgrade-cost-label').textContent=atMax?t('max'):`${t('cost')} ${needed} XP`;
+  document.getElementById('forge-btn').textContent=t('forge');
   document.getElementById('forge-btn').disabled=G.isUpgrading||G.forgeCooldown>0;
+  document.getElementById('auto-forge-btn').textContent=t('auto');
   document.getElementById('auto-forge-btn').classList.toggle('active',G.autoForge);
   document.getElementById('auto-forge-btn').disabled=G.isUpgrading||!!G.currentItem;
 
   renderProbs();renderAutoForgeFilter();renderSlots();renderBattle();
 
   const te=document.getElementById('upgrade-timer');
-  if(G.isUpgrading){te.classList.add('active');const m=Math.floor(G.upgradeTimeLeft/60),s=Math.floor(G.upgradeTimeLeft%60);document.getElementById('upgrade-time').textContent=`${m}:${s.toString().padStart(2,'0')}`}
+  if(G.isUpgrading){te.classList.add('active');const m=Math.floor(G.upgradeTimeLeft/60),s=Math.floor(G.upgradeTimeLeft%60);document.getElementById('upgrade-time').textContent=`${m}:${s.toString().padStart(2,'0')}`;const utl=document.getElementById('upgrade-timer-label');if(utl)utl.textContent=t('upgrading')}
   else te.classList.remove('active');
 
-  document.getElementById('enemy-counter').textContent=G.enemiesRemaining>1?`${G.enemiesRemaining} enemies left`:'';
+  document.getElementById('enemy-counter').textContent=G.enemiesRemaining>1?`${G.enemiesRemaining} ${t('enemiesLeft')}`:'';
 
   const combatPower=getTotalItemPower()+BASE_DAMAGE;
-  document.getElementById('char-stats').textContent=`Combat Power: ${combatPower}`;
+  document.getElementById('char-stats').textContent=t('combatPower')+`: ${combatPower}`;
 }
 
 function renderProbs(){
   const probs=getForgeProbabilities(),c=document.getElementById('forge-probs');c.innerHTML='';
-  for(const[n,ch]of Object.entries(probs)){const e=document.createElement('span');e.className='prob';const col=rarityColor(n);e.style.color=col;e.style.borderColor=col+'44';e.textContent=`${n}: ${ch.toFixed(1)}%`;c.appendChild(e)}
+  for(const[n,ch]of Object.entries(probs)){const e=document.createElement('span');e.className='prob';const col=rarityColor(n);e.style.color=col;e.style.borderColor=col+'44';e.textContent=`${tn(n)}: ${ch.toFixed(1)}%`;c.appendChild(e)}
 }
 
 function renderAutoForgeFilter(){
-  // Clamp autoForgeMinRarity to highest unlocked
   const maxAvail=RARITIES.reduce((m,r,i)=>r.minForgeLv<=G.forgeLv?i:m,-1);
   if(G.autoForgeMinRarity>maxAvail)G.autoForgeMinRarity=Math.max(0,maxAvail);
-  const c=document.getElementById('auto-filter-row');c.innerHTML='<span style="font-size:9px;color:#555;margin-right:4px">Auto min:</span>';
+  const c=document.getElementById('auto-filter-row');c.innerHTML='<span style="font-size:9px;color:#555;margin-right:4px">'+t('autoMin')+'</span>';
   RARITIES.forEach((r,i)=>{
     if(r.minForgeLv>G.forgeLv)return;
     const b=document.createElement('button');
-    b.textContent=r.name;
+    b.textContent=tn(r.name);
     b.style.cssText=`font-size:8px;padding:1px 5px;border-radius:3px;border:1px solid ${i===G.autoForgeMinRarity?rarityColor(r.name):'#2a2a4a'};background:${i===G.autoForgeMinRarity?rarityColor(r.name)+'33':'rgba(255,255,255,.03)'};color:${i===G.autoForgeMinRarity?rarityColor(r.name):'#555'};cursor:pointer`;
     b.onclick=()=>setAutoForgeMin(i);
     c.appendChild(b);
@@ -761,9 +846,9 @@ function renderSlots(){
     const el=document.querySelector(`.equip-slot[data-slot="${t.id}"]`),item=G.equipped[t.id],unlocked=G.wave>=t.unlockWave;
     el.className='equip-slot';if(!unlocked)el.classList.add('locked');
     const ne=el.querySelector('.slot-item-name'),re=el.querySelector('.slot-rarity');
-    if(item){const nm=item.weaponStyle==='ranged'?'🏹':item.weaponStyle==='melee'?'🗡️':item.icon;ne.textContent=`${nm} ${t.label}`;ne.className='slot-item-name';ne.style.color=rarityColor(item.rarity);re.textContent=item.hp?`${item.rarity} +${item.hp}HP`:`${item.rarity} +${item.damage}DMG`;re.className='slot-rarity';re.style.color=rarityColor(item.rarity);el.style.borderColor=rarityColor(item.rarity)+'66'}
-    else if(unlocked){ne.textContent='Empty';ne.className='slot-item-name empty-text';re.textContent='';el.style.borderColor='#2a2a4a'}
-    else{ne.textContent=`🔒 Wave ${t.unlockWave}`;ne.className='slot-item-name empty-text';re.textContent='';el.style.borderColor='#2a2a4a'}
+    if(item){const nm=item.weaponStyle==='ranged'?'🏹':item.weaponStyle==='melee'?'🗡️':item.icon;ne.textContent=`${nm} ${tl(t)}`;ne.className='slot-item-name';ne.style.color=rarityColor(item.rarity);re.textContent=item.hp?`${tn(item.rarity)} +${item.hp}${t('hp')}`:`${tn(item.rarity)} +${item.damage}${t('dmg')}`;re.className='slot-rarity';re.style.color=rarityColor(item.rarity);el.style.borderColor=rarityColor(item.rarity)+'66'}
+    else if(unlocked){ne.textContent=t('empty');ne.className='slot-item-name empty-text';re.textContent='';el.style.borderColor='#2a2a4a'}
+    else{ne.textContent=`🔒 ${t('wave')} ${t.unlockWave}`;ne.className='slot-item-name empty-text';re.textContent='';el.style.borderColor='#2a2a4a'}
   });
 }
 
@@ -810,7 +895,7 @@ function renderBattle(){
     let h='';
     const spriteClass=e.attackAnim>0?'char-sprite attacking':'char-sprite';
     const emoji=e.isBoss?'👹':'👾';
-    const label=e.isBoss?`BOSS ${e.id+1}`:`Enemy ${e.id+1}`;
+    const label=e.isBoss?`${t('boss')} ${e.id+1}`:`${t('enemy')} ${e.id+1}`;
     h+=`<div class="${spriteClass}">${emoji}</div>`;
     h+=`<div class="char-name">${label}</div>`;
     const hpPct=e.maxHp>0?(e.hp/e.maxHp)*100:0;
@@ -845,54 +930,55 @@ function renderItemPreview(){
   // Show equipped item stats when viewing a slot
   if(G.viewingSlot&&G.equipped[G.viewingSlot]){
     const item=G.equipped[G.viewingSlot],color=rarityColor(item.rarity);
-    let h=`<div class="preview-header"><div><div class="preview-name" style="color:${color}">${item.icon} ${item.typeLabel}</div><div class="preview-level">Level ${item.level}</div></div><div class="preview-rarity" style="color:${color};background:${color}22;border:1px solid ${color}44">${item.rarity}</div></div>`;
-    h+=`<div class="preview-power">⚡ ${item.power} Power</div><div class="preview-stats">`;
+    let h=`<div class="preview-header"><div><div class="preview-name" style="color:${color}">${item.icon} ${ti(item)}</div><div class="preview-level">${t('level')} ${item.level}</div></div><div class="preview-rarity" style="color:${color};background:${color}22;border:1px solid ${color}44">${tn(item.rarity)}</div></div>`;
+    h+=`<div class="preview-power">⚡ ${item.power} ${t('combatPower')}</div><div class="preview-stats">`;
     const ms=getItemMainStat(item);
     h+=`<div class="preview-stat neutral"><span>${ms.label}</span><span class="stat-val">+${ms.value}</span></div>`;
-    if(item.range)h+=`<div class="preview-stat better"><span>🏹 Range</span><span class="stat-val">First Strike</span></div>`;
-    item.substats.forEach(s=>{h+=`<div class="preview-stat neutral"><span>${s.name}</span><span class="stat-val">+${s.value}${s.suffix}</span></div>`});
-    h+=`</div><div class="preview-actions"><button class="btn-discard" onclick="unequipSlot('${G.viewingSlot}');G.viewingSlot=null;renderItemPreview()">Unequip</button><button class="btn-equip" onclick="G.viewingSlot=null;renderItemPreview()">Close</button></div>`;
+    if(item.range)h+=`<div class="preview-stat better"><span>🏹 ${t('rangeLabel')}</span><span class="stat-val">${t('firstStrike')}</span></div>`;
+    item.substats.forEach(s=>{h+=`<div class="preview-stat neutral"><span>${ts(s.id)}</span><span class="stat-val">+${s.value}${s.suffix}</span></div>`});
+    h+=`</div><div class="preview-actions"><button class="btn-discard" onclick="unequipSlot('${G.viewingSlot}');G.viewingSlot=null;renderItemPreview()">${t('unequip')}</button><button class="btn-equip" onclick="G.viewingSlot=null;renderItemPreview()">${t('close')}</button></div>`;
     c.innerHTML=h;
     return;
   }
   G.viewingSlot=null;
 
-  if(!G.currentItem){c.innerHTML='<div class="no-item">Forge an item to see it here</div>';return}
+  if(!G.currentItem){c.innerHTML='<div class="no-item">'+t('forgeForItem')+'</div>';return}
   const item=G.currentItem,color=rarityColor(item.rarity),cur=G.equipped[item.type];
-  let h=`<div class="preview-header"><div><div class="preview-name" style="color:${color}">${item.icon} ${item.typeLabel}</div><div class="preview-level">Level ${item.level}</div></div><div class="preview-rarity" style="color:${color};background:${color}22;border:1px solid ${color}44">${item.rarity}</div></div>`;
-  h+=`<div class="preview-power">⚡ ${item.power} Power</div><div class="preview-stats">`;
+  let h=`<div class="preview-header"><div><div class="preview-name" style="color:${color}">${item.icon} ${ti(item)}</div><div class="preview-level">${t('level')} ${item.level}</div></div><div class="preview-rarity" style="color:${color};background:${color}22;border:1px solid ${color}44">${tn(item.rarity)}</div></div>`;
+  h+=`<div class="preview-power">⚡ ${item.power} ${t('combatPower')}</div><div class="preview-stats">`;
   const ms=getItemMainStat(item),cms=cur?getItemMainStat(cur):{value:0};
   const mc=ms.value>cms.value?'better':(ms.value<cms.value?'worse':'neutral');
   h+=`<div class="preview-stat ${mc}"><span>${ms.label}</span><span class="stat-val">+${ms.value} ${cur?`(${cms.value})`:''}</span></div>`;
-  if(item.range)h+=`<div class="preview-stat better"><span>🏹 Range</span><span class="stat-val">First Strike</span></div>`;
-  item.substats.forEach(s=>{let cv=0;if(cur){const cs=cur.substats.find(ss=>ss.id===s.id);if(cs)cv=cs.value}const sc=s.value>cv?'better':(s.value<cv?'worse':'neutral');h+=`<div class="preview-stat ${sc}"><span>${s.name}</span><span class="stat-val">+${s.value}${s.suffix} ${cur?`(${cv}${s.suffix})`:''}</span></div>`});
-  h+=`</div><div class="preview-actions"><button class="btn-equip" onclick="equipCurrentItem()">Equip</button><button class="btn-discard" onclick="discardCurrentItem()">Discard</button></div>`;
+  if(item.range)h+=`<div class="preview-stat better"><span>🏹 ${t('rangeLabel')}</span><span class="stat-val">${t('firstStrike')}</span></div>`;
+  item.substats.forEach(s=>{let cv=0;if(cur){const cs=cur.substats.find(ss=>ss.id===s.id);if(cs)cv=cs.value}const sc=s.value>cv?'better':(s.value<cv?'worse':'neutral');h+=`<div class="preview-stat ${sc}"><span>${ts(s.id)}</span><span class="stat-val">+${s.value}${s.suffix} ${cur?`(${cv}${s.suffix})`:''}</span></div>`});
+  h+=`</div><div class="preview-actions"><button class="btn-equip" onclick="equipCurrentItem()">${t('equip')}</button><button class="btn-discard" onclick="discardCurrentItem()">${t('discard')}</button></div>`;
   c.innerHTML=h;
 }
 
 // ========== STATS POPUP ==========
 function toggleStats(){document.getElementById('stats-popup').classList.toggle('open');renderStatsPopup()}
 function renderStatsPopup(){
+  document.getElementById('stats-popup-title').textContent=t('charStats');
   document.getElementById('name-input').value=G.playerName;
   document.getElementById('gender-select').value=G.gender;
   const stats=getCharacterStats(),grid=document.getElementById('stats-grid');grid.innerHTML='';
   const combatPower=getTotalItemPower()+BASE_DAMAGE;
-  const e=[{label:'Combat Power',value:combatPower,suffix:''},{label:'Attack',value:stats.damage,suffix:''},{label:'Bonus DMG',value:stats.bonusDamage,suffix:''},{label:'Max HP',value:G.charMaxHp,suffix:''},{label:'Armor HP',value:stats.hp,suffix:''},{label:'HP Regen',value:(1+(stats.hpRegen||0)).toFixed(1),suffix:'/s'},{label:'Attack Speed',value:stats.attackSpeed.toFixed(1),suffix:'%'},{label:'Combo Chance',value:stats.comboChance.toFixed(1),suffix:'%'},{label:'Lifesteal',value:stats.lifestealChance.toFixed(1),suffix:'%'},{label:'Block Chance',value:stats.blockChance.toFixed(1),suffix:'%'},{label:'Evade Chance',value:stats.evadeChance.toFixed(1),suffix:'%'},{label:'Item Power',value:getTotalItemPower(),suffix:''}];
+  const e=[{label:t('labelCombatPower'),value:combatPower,suffix:''},{label:t('statAtk'),value:stats.damage,suffix:''},{label:t('statBonusDmg'),value:stats.bonusDamage,suffix:''},{label:t('statMaxHp'),value:G.charMaxHp,suffix:''},{label:t('statArmorHp'),value:stats.hp,suffix:''},{label:t('statHpRegen'),value:(1+(stats.hpRegen||0)).toFixed(1),suffix:'/s'},{label:t('statAtkSpd'),value:stats.attackSpeed.toFixed(1),suffix:'%'},{label:t('statCombo'),value:stats.comboChance.toFixed(1),suffix:'%'},{label:t('statLifesteal'),value:stats.lifestealChance.toFixed(1),suffix:'%'},{label:t('statBlock'),value:stats.blockChance.toFixed(1),suffix:'%'},{label:t('statEvade'),value:stats.evadeChance.toFixed(1),suffix:'%'},{label:t('statItemPower'),value:getTotalItemPower(),suffix:''}];
   e.forEach(x=>{const d=document.createElement('div');d.className='stat-item';d.innerHTML=`<span class="label">${x.label}</span><span class="value">${x.value}${x.suffix}</span>`;grid.appendChild(d)});
-  const lc=document.getElementById('equip-list-popup');lc.innerHTML='<div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;border-top:1px solid #2a2a4a;padding-top:8px">Equipped Items</div>';
+  const lc=document.getElementById('equip-list-popup');lc.innerHTML='<div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;border-top:1px solid #2a2a4a;padding-top:8px">'+t('equippedItems')+'</div>';
   ITEM_TYPES.forEach(t=>{
     const item=G.equipped[t.id],d=document.createElement('div');
     if(item){
       const col=rarityColor(item.rarity),main=item.damage?`+${item.damage} DMG`:`+${item.hp} HP`;
       const icon=item.icon||t.icon;
       d.style.cssText=`display:flex;align-items:center;gap:6px;padding:3px 6px;margin-bottom:2px;border-radius:4px;font-size:10px;background:rgba(255,255,255,.02);border-left:2px solid ${col}`;
-      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">${icon}</span><span style="flex:1;color:${col};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.rarity} ${item.typeLabel}</span><span style="font-size:9px;color:#888">${main}</span><span style="color:#f5c518;font-size:9px;font-weight:600">⚡${item.power}</span>`;
+      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">${icon}</span><span style="flex:1;color:${col};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tn(item.rarity)} ${ti(item)}</span><span style="font-size:9px;color:#888">${main}</span><span style="color:#f5c518;font-size:9px;font-weight:600">⚡${item.power}</span>`;
     } else if(G.wave>=t.unlockWave){
       d.style.cssText=`display:flex;align-items:center;gap:6px;padding:3px 6px;margin-bottom:2px;border-radius:4px;font-size:10px;color:#444`;
-      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">${t.icon}</span><span style="flex:1">${t.label}</span><span style="color:#333;font-style:italic">Empty</span>`;
+      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">${t.icon}</span><span style="flex:1">${tl(t)}</span><span style="color:#333;font-style:italic">${t('empty')}</span>`;
     } else {
       d.style.cssText=`display:flex;align-items:center;gap:6px;padding:3px 6px;margin-bottom:2px;border-radius:4px;font-size:10px;color:#333`;
-      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">🔒</span><span style="flex:1">${t.label}</span><span>Wave ${t.unlockWave}</span>`;
+      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">🔒</span><span style="flex:1">${tl(t)}</span><span>${t('wave')} ${t.unlockWave}</span>`;
     }
     lc.appendChild(d);
   });
@@ -932,7 +1018,7 @@ function gameLoop(time){
 
 // ========== RESET ==========
 function resetGame(){
-  if(!confirm('Reset all progress?'))return;
+  if(!confirm(t('resetConfirm')))return;
   localStorage.removeItem('forgeMasterSave');
   G.forgeLv=1;G.forgeXp=0;G.isUpgrading=false;G.upgradeTimeLeft=0;G.currentItem=null;G.autoForge=false;G.autoForgeMinRarity=0;
   G.equipped={helmet:null,chestplate:null,gloves:null,belt:null,boots:null,weapon:null,amulet:null,ring:null};
@@ -960,6 +1046,7 @@ function init(){
   setInterval(()=>{render();renderItemPreview()},500);
   setInterval(()=>{saveGame();if(chatConnected)sendChatUpdate()},10000);
   connectChat();
+  renderLang();
 }
 // ========== CHAT SYSTEM ==========
 // For local dev: 'ws://localhost:8080'
@@ -985,21 +1072,21 @@ const MAX_CHAT_MSGS = 100;
 function connectChat() {
   const el = document.getElementById('connecting-msg');
   if (!el) return;
-  el.textContent = 'Connecting to server...';
+  el.textContent = t('connecting');
   el.className = '';
   try {
     chatSocket = new WebSocket(CHAT_SERVER_URL);
   } catch (e) {
-    el.textContent = 'Server unavailable. Retrying...';
+    el.textContent = t('serverUnavail');
     el.className = 'disconnected';
     scheduleReconnect();
     return;
   }
   chatSocket.onopen = () => {
     chatConnected = true;
-    el.textContent = 'Connected';
+    el.textContent = t('connected');
     el.className = 'connected';
-    setTimeout(() => { if (el) el.textContent = ''; }, 3000);
+    if (chatOpen) renderChatMessages();
     sendJoin();
   };
   chatSocket.onmessage = (e) => {
@@ -1011,7 +1098,7 @@ function connectChat() {
     chatConnected = false;
     chatSocket = null;
     const el2 = document.getElementById('connecting-msg');
-    if (el2) { el2.textContent = 'Disconnected. Reconnecting...'; el2.className = 'disconnected'; }
+    if (el2) { el2.textContent = t('disconnected'); el2.className = 'disconnected'; }
     scheduleReconnect();
   };
   chatSocket.onerror = () => { /* onclose handles it */ };
@@ -1065,13 +1152,22 @@ function handleChatMessage(msg) {
   if (msg.type === 'chat') {
     chatMessages.push(msg);
   } else if (msg.type === 'system') {
-    chatMessages.push({ system: true, message: msg.message, timestamp: msg.timestamp || '' });
+    let sysMsg = msg.message;
+    if (LANG === 'fr') {
+      const jMatch = sysMsg.match(/^(.+) joined the game!$/);
+      if (jMatch) sysMsg = t('joined', { name: jMatch[1] });
+      const lMatch = sysMsg.match(/^(.+) left the game\.$/);
+      if (lMatch) sysMsg = t('left', { name: lMatch[1] });
+    }
+    chatMessages.push({ system: true, message: sysMsg, timestamp: msg.timestamp || '' });
   } else if (msg.type === 'stats') {
     showStatsPopup(msg.name, msg);
     return;
   } else if (msg.type === 'players') {
+    const total = (msg.players ? msg.players.length : 0) + 1;
     const el = document.getElementById('chat-online');
-    if (el && msg.players) el.textContent = msg.players.length > 0 ? `${msg.players.length + 1} online` : '';
+    if (el) el.textContent = `${total} ${t('online')}`;
+    if (chatOpen) renderChatMessages();
     return;
   }
   if (chatMessages.length > MAX_CHAT_MSGS) chatMessages.splice(0, chatMessages.length - MAX_CHAT_MSGS);
@@ -1156,7 +1252,7 @@ function showStatsPopup(name, data) {
         const icon = item.icon || labels[sl] || '📦';
         itemsHtml += `<div class="psp-item-row" style="border-left:2px solid ${col}">
           <span class="psp-item-icon">${icon}</span>
-          <span class="psp-item-name" style="color:${col}">${escapeHtml(item.rarity)} ${escapeHtml(item.typeLabel)}</span>
+          <span class="psp-item-name" style="color:${col}">${escapeHtml(tn(item.rarity))} ${escapeHtml(ti(item))}</span>
           <span class="psp-item-main">${main}</span>
           <span class="psp-item-power">⚡${item.power}</span>
         </div>`;
@@ -1179,8 +1275,16 @@ function showStatsPopup(name, data) {
   popup.addEventListener('click', (e) => { if (e.target === popup) popup.remove(); });
 }
 
-window.addEventListener('beforeunload', saveGame);
+function renderLang() {
+  document.getElementById('chat-header-title').textContent='💬 '+t('chat');
+  document.getElementById('chat-send-btn').textContent=t('send');
+  document.getElementById('chat-input').placeholder=t('msgPlaceholder');
+  document.getElementById('connecting-msg').textContent=t('connecting');
+  const gm=document.getElementById('gender-male');if(gm)gm.textContent='🧑 '+t('male');
+  const gf=document.getElementById('gender-female');if(gf)gf.textContent='👩 '+t('female');
+}
 init();
+window.addEventListener('beforeunload', saveGame);
 </script>
 </body>
 </html>
