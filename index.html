@@ -189,7 +189,7 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
 <div id="app">
   <!-- Top Bar -->
   <div id="topbar">
-    <div id="char-avatar" onclick="toggleStats()">⚒</div>
+    <div id="char-avatar" onclick="toggleStats()">👨🏻</div>
     <div id="top-info">
       <div id="char-name"></div>
       <div id="char-stats"></div>
@@ -288,8 +288,9 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
     <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
       <input id="name-input" type="text" maxlength="20" style="flex:1;padding:4px 8px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#ddd;font-size:12px" oninput="setName(this.value)">
       <select id="gender-select" style="padding:4px 8px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#ddd;font-size:12px;cursor:pointer" onchange="setGender(this.value)">
-        <option id="gender-male" value="male">🧑 Male</option>
-        <option id="gender-female" value="female">👩 Female</option>
+        <option id="gender-male" value="male">👨🏻 Male</option>
+        <option id="gender-female" value="female">👩🏻 Female</option>
+        <option id="gender-cat" value="cat">🐱 Cat</option>
       </select>
     </div>
     <div class="stats-grid" id="stats-grid"></div>
@@ -361,7 +362,7 @@ const ITEM_TYPES = [
 const LANG_STRINGS = {
   en: {
     playerName:'Forging Master', wave:'Wave', level:'Level', enemiesLeft:'enemies left', combatPower:'Combat Power',
-    male:'Male', female:'Female',
+    male:'Male', female:'Female', cat:'Cat',
     forgeLevel:'⚒ Forge Lv.', xp:'XP:', upgrade:'⬆ Upgrade Forge', cost:'cost:', max:'MAX',
     upgrading:'⬆ Upgrading...', forge:'⚒ Forge', auto:'🔄 Auto', autoMin:'Auto min:',
     forgeForItem:'Forge an item to see it here', betterFound:'Better {slot} found!', newForged:'New {slot} forged!',
@@ -396,7 +397,7 @@ const LANG_STRINGS = {
   },
   fr: {
     playerName:'Maître Forgeron', wave:'Vague', level:'Niveau', enemiesLeft:'ennemis restants', combatPower:'Puissance de Combat',
-    male:'Masculin', female:'Féminin',
+    male:'Masculin', female:'Féminin', cat:'Chat',
     forgeLevel:'⚒ Forge Niv.', xp:'XP:', upgrade:'⬆ Améliorer la Forge', cost:'coût:', max:'MAX',
     upgrading:'⬆ Amélioration...', forge:'⚒ Forger', auto:'🔄 Auto', autoMin:'Min auto:',
     forgeForItem:'Forge un objet pour le voir ici', betterFound:'Meilleur {slot} trouvé !', newForged:'Nouveau {slot} forgé !',
@@ -478,7 +479,7 @@ function randInt(a,b){return Math.floor(rand(a,b+1))}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function pick(a){return a[randInt(0,a.length-1)]}
 function setName(v){G.playerName=v||t('playerName');render();if(chatConnected)sendChatUpdate()}
-function setGender(v){G.gender=v;document.getElementById('char-avatar').textContent=v==='female'?'👩':'⚒';renderStatsPopup();if(chatConnected)sendChatUpdate()}
+function setGender(v){G.gender=v;document.getElementById('char-avatar').textContent=v==='cat'?'🐱':(v==='female'?'👩🏻':'👨🏻');renderStatsPopup();if(chatConnected)sendChatUpdate()}
 
 function rarityColor(r){const m={Common:'#aaa',Uncommon:'#2ecc71',Rare:'#3498db',Epic:'#9b59b6',Legendary:'#f39c12',Mythic:'#e94560',Ascended:'#00d2ff',Transcendent:'#ff6bff',Eternal:'#ff4440',Cosmic:'#a78bfa',Void:'#06b6d4',Astral:'#fb923c',Divine:'#facc15',Omega:'#f87171',Absolute:'#ffffff'};return m[r]||'#aaa'}
 
@@ -791,7 +792,7 @@ function combatTick(dt){
 // ========== RENDER ==========
 function render(){
   document.getElementById('char-name').textContent=G.playerName;
-  document.getElementById('char-avatar').textContent=G.gender==='female'?'👩':'⚒';
+  document.getElementById('char-avatar').textContent=G.gender==='cat'?'🐱':(G.gender==='female'?'👩🏻':'👨🏻');
   document.getElementById('wave-num').textContent=G.wave;
 
   const needed=forgeXpForLevel(G.forgeLv);
@@ -861,7 +862,7 @@ function renderBattle(){
   const pnEl=pEl.querySelector('.char-name');
   if(pnEl)pnEl.textContent=G.playerName;
   const ps=document.getElementById('player-sprite');
-  ps.textContent=G.gender==='female'?'👩':'👨';
+  ps.textContent=G.gender==='cat'?'🐱':(G.gender==='female'?'👩🏻':'👨🏻');
 
   // Player HP bars
   const pHpPct=G.charMaxHp>0?(G.charHp/G.charMaxHp)*100:0;
@@ -1115,7 +1116,7 @@ function sendJoin() {
   chatSocket.send(JSON.stringify({
     type: 'join',
     name: G.playerName || 'Forging Master',
-    icon: G.gender === 'female' ? '👩' : '👨',
+    icon: G.gender === 'cat' ? '🐱' : (G.gender === 'female' ? '👩🏻' : '👨🏻'),
     power,
     forgeLv: G.forgeLv,
     wave: G.wave,
@@ -1130,7 +1131,7 @@ function sendChatUpdate() {
     type: 'update',
     data: {
       name: G.playerName || 'Forging Master',
-      icon: G.gender === 'female' ? '👩' : '👨',
+      icon: G.gender === 'cat' ? '🐱' : (G.gender === 'female' ? '👩🏻' : '👨🏻'),
       power,
       forgeLv: G.forgeLv,
       wave: G.wave,
@@ -1185,7 +1186,7 @@ function renderChatMessages() {
       const safeName = escapeHtml(msg.name);
       h += `<div class="msg-entry">
         <div class="msg-top">
-          <span class="msg-icon" onclick="showPlayerStats('${safeName}')" title="View ${safeName}'s stats">${msg.icon || '👨'}</span>
+          <span class="msg-icon" onclick="showPlayerStats('${safeName}')" title="View ${safeName}'s stats">${msg.icon || '👨🏻'}</span>
           <span class="msg-name" onclick="showPlayerStats('${safeName}')" title="View ${safeName}'s stats">${safeName}</span>
           <span class="msg-power">⚡${msg.power || 0}</span>
           <span class="msg-time">${msg.timestamp || ''}</span>
@@ -1260,7 +1261,7 @@ function showStatsPopup(name, data) {
     }
     popup.innerHTML = `
       <div class="psp-header">
-        <div class="psp-icon">${data.icon || '👨'}</div>
+        <div class="psp-icon">${data.icon || '👨🏻'}</div>
         <div class="psp-name">${escapeHtml(data.name)}</div>
       </div>
       <div class="psp-grid">
@@ -1280,8 +1281,9 @@ function renderLang() {
   document.getElementById('chat-send-btn').textContent=t('send');
   document.getElementById('chat-input').placeholder=t('msgPlaceholder');
   document.getElementById('connecting-msg').textContent=t('connecting');
-  const gm=document.getElementById('gender-male');if(gm)gm.textContent='🧑 '+t('male');
-  const gf=document.getElementById('gender-female');if(gf)gf.textContent='👩 '+t('female');
+  const gm=document.getElementById('gender-male');if(gm)gm.textContent='👨🏻 '+t('male');
+  const gf=document.getElementById('gender-female');if(gf)gf.textContent='👩🏻 '+t('female');
+  const gc=document.getElementById('gender-cat');if(gc)gc.textContent='🐱 '+t('cat');
 }
 init();
 window.addEventListener('beforeunload', saveGame);
