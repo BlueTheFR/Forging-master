@@ -842,13 +842,13 @@ function renderAutoForgeFilter(){
   });
 }
 function renderSlots(){
-  ITEM_TYPES.forEach(t=>{
-    const el=document.querySelector(`.equip-slot[data-slot="${t.id}"]`),item=G.equipped[t.id],unlocked=G.wave>=t.unlockWave;
+  ITEM_TYPES.forEach(slot=>{
+    const el=document.querySelector(`.equip-slot[data-slot="${slot.id}"]`),item=G.equipped[slot.id],unlocked=G.wave>=slot.unlockWave;
     el.className='equip-slot';if(!unlocked)el.classList.add('locked');
     const ne=el.querySelector('.slot-item-name'),re=el.querySelector('.slot-rarity');
-    if(item){const nm=item.weaponStyle==='ranged'?'🏹':item.weaponStyle==='melee'?'🗡️':item.icon;ne.textContent=`${nm} ${tl(t)}`;ne.className='slot-item-name';ne.style.color=rarityColor(item.rarity);re.textContent=item.hp?`${tn(item.rarity)} +${item.hp}${t('hp')}`:`${tn(item.rarity)} +${item.damage}${t('dmg')}`;re.className='slot-rarity';re.style.color=rarityColor(item.rarity);el.style.borderColor=rarityColor(item.rarity)+'66'}
+    if(item){const nm=item.weaponStyle==='ranged'?'🏹':item.weaponStyle==='melee'?'🗡️':item.icon;ne.textContent=`${nm} ${tl(slot)}`;ne.className='slot-item-name';ne.style.color=rarityColor(item.rarity);re.textContent=item.hp?`${tn(item.rarity)} +${item.hp}${t('hp')}`:`${tn(item.rarity)} +${item.damage}${t('dmg')}`;re.className='slot-rarity';re.style.color=rarityColor(item.rarity);el.style.borderColor=rarityColor(item.rarity)+'66'}
     else if(unlocked){ne.textContent=t('empty');ne.className='slot-item-name empty-text';re.textContent='';el.style.borderColor='#2a2a4a'}
-    else{ne.textContent=`🔒 ${t('wave')} ${t.unlockWave}`;ne.className='slot-item-name empty-text';re.textContent='';el.style.borderColor='#2a2a4a'}
+    else{ne.textContent=`🔒 ${t('wave')} ${slot.unlockWave}`;ne.className='slot-item-name empty-text';re.textContent='';el.style.borderColor='#2a2a4a'}
   });
 }
 
@@ -966,19 +966,19 @@ function renderStatsPopup(){
   const e=[{label:t('labelCombatPower'),value:combatPower,suffix:''},{label:t('statAtk'),value:stats.damage,suffix:''},{label:t('statBonusDmg'),value:stats.bonusDamage,suffix:''},{label:t('statMaxHp'),value:G.charMaxHp,suffix:''},{label:t('statArmorHp'),value:stats.hp,suffix:''},{label:t('statHpRegen'),value:(1+(stats.hpRegen||0)).toFixed(1),suffix:'/s'},{label:t('statAtkSpd'),value:stats.attackSpeed.toFixed(1),suffix:'%'},{label:t('statCombo'),value:stats.comboChance.toFixed(1),suffix:'%'},{label:t('statLifesteal'),value:stats.lifestealChance.toFixed(1),suffix:'%'},{label:t('statBlock'),value:stats.blockChance.toFixed(1),suffix:'%'},{label:t('statEvade'),value:stats.evadeChance.toFixed(1),suffix:'%'},{label:t('statItemPower'),value:getTotalItemPower(),suffix:''}];
   e.forEach(x=>{const d=document.createElement('div');d.className='stat-item';d.innerHTML=`<span class="label">${x.label}</span><span class="value">${x.value}${x.suffix}</span>`;grid.appendChild(d)});
   const lc=document.getElementById('equip-list-popup');lc.innerHTML='<div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;border-top:1px solid #2a2a4a;padding-top:8px">'+t('equippedItems')+'</div>';
-  ITEM_TYPES.forEach(t=>{
-    const item=G.equipped[t.id],d=document.createElement('div');
+  ITEM_TYPES.forEach(slot=>{
+    const item=G.equipped[slot.id],d=document.createElement('div');
     if(item){
       const col=rarityColor(item.rarity),main=item.damage?`+${item.damage} DMG`:`+${item.hp} HP`;
-      const icon=item.icon||t.icon;
+      const icon=item.icon||slot.icon;
       d.style.cssText=`display:flex;align-items:center;gap:6px;padding:3px 6px;margin-bottom:2px;border-radius:4px;font-size:10px;background:rgba(255,255,255,.02);border-left:2px solid ${col}`;
       d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">${icon}</span><span style="flex:1;color:${col};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tn(item.rarity)} ${ti(item)}</span><span style="font-size:9px;color:#888">${main}</span><span style="color:#f5c518;font-size:9px;font-weight:600">⚡${item.power}</span>`;
-    } else if(G.wave>=t.unlockWave){
+    } else if(G.wave>=slot.unlockWave){
       d.style.cssText=`display:flex;align-items:center;gap:6px;padding:3px 6px;margin-bottom:2px;border-radius:4px;font-size:10px;color:#444`;
-      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">${t.icon}</span><span style="flex:1">${tl(t)}</span><span style="color:#333;font-style:italic">${t('empty')}</span>`;
+      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">${slot.icon}</span><span style="flex:1">${tl(slot)}</span><span style="color:#333;font-style:italic">${t('empty')}</span>`;
     } else {
       d.style.cssText=`display:flex;align-items:center;gap:6px;padding:3px 6px;margin-bottom:2px;border-radius:4px;font-size:10px;color:#333`;
-      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">🔒</span><span style="flex:1">${tl(t)}</span><span>${t('wave')} ${t.unlockWave}</span>`;
+      d.innerHTML=`<span style="font-size:13px;width:18px;text-align:center">🔒</span><span style="flex:1">${tl(slot)}</span><span>${t('wave')} ${slot.unlockWave}</span>`;
     }
     lc.appendChild(d);
   });
