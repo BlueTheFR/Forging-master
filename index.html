@@ -8,7 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#0d0d0d}
 body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;display:flex;justify-content:center;align-items:center}
-#app{width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
+#app{width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;overflow-y:auto;background:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#4a4a7a;border-radius:2px}
@@ -90,7 +90,7 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
 #upgrade-timer.active{display:block}
 
 /* ITEM PREVIEW */
-#item-preview{max-height:150px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid #2a2a4a;border-radius:5px;padding:5px 10px;margin-top:3px}
+#item-preview{background:rgba(0,0,0,.3);border:1px solid #2a2a4a;border-radius:5px;padding:5px 10px;margin-top:3px}
 #item-preview .no-item{color:#444;font-size:11px;text-align:center;padding:10px 0;font-style:italic}
 .preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
 .preview-name{font-size:13px;font-weight:700}
@@ -142,7 +142,6 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
 #chat-panel{position:absolute;left:0;top:0;bottom:0;width:320px;max-width:90vw;background:rgba(10,10,25,.95);border-right:1px solid #2a2a4a;z-index:25;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .25s ease;backdrop-filter:blur(8px)}
 #chat-panel.open{transform:translateX(0)}
 #chat-panel .chat-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2a2a4a;flex-shrink:0}
-#chat-panel .chat-header h3{font-size:14px;color:#e94560}
 #chat-panel .chat-close{font-size:18px;cursor:pointer;color:#666;line-height:1}
 #chat-panel .chat-close:hover{color:#e94560}
 #chat-messages{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
@@ -163,6 +162,67 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
 #chat-send-btn:hover{box-shadow:0 2px 8px rgba(233,69,96,.4)}
 #chat-online{position:absolute;bottom:4px;right:8px;font-size:9px;color:#555}
 
+/* CHAT TABS */
+.chat-tabs{display:flex;gap:0}
+.chat-tab{padding:6px 12px;font-size:11px;cursor:pointer;color:#555;border-bottom:2px solid transparent;transition:all .15s}
+.chat-tab:hover{color:#aaa}
+.chat-tab.active{color:#e94560;border-bottom-color:#e94560}
+
+/* PVP LEADERBOARD */
+#pvp-leaderboard{font-size:10px}
+.pvp-lb-title{font-size:13px;font-weight:700;color:#f5c518;text-align:center;margin-bottom:8px}
+.pvp-lb-row{display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:4px;margin-bottom:2px;background:rgba(255,255,255,.02);border-left:2px solid transparent}
+.pvp-lb-row.self{background:rgba(233,69,96,.1);border-left-color:#e94560}
+.pvp-lb-rank{width:18px;text-align:center;font-weight:700;color:#888}
+.pvp-lb-icon{font-size:14px;width:20px;text-align:center}
+.pvp-lb-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd;font-weight:600}
+.pvp-lb-stat{text-align:center;font-size:9px;color:#888;min-width:30px}
+.pvp-lb-stat .val{color:#f5c518;font-weight:700}
+.pvp-lb-ratio{font-size:9px;color:#888;min-width:32px;text-align:center}
+.pvp-lb-ratio .val{font-weight:700}
+.pvp-lb-btn{font-size:9px;padding:2px 8px;border:none;border-radius:3px;cursor:pointer;background:linear-gradient(135deg,#e94560,#c23152);color:#fff}
+.pvp-lb-btn:hover{box-shadow:0 1px 6px rgba(233,69,96,.4)}
+.pvp-lb-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* PVP FIGHT RESULT */
+.pvp-result-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center}
+.pvp-result-box{background:rgba(10,10,25,.97);border:1px solid #2a2a4a;border-radius:12px;padding:24px;text-align:center;min-width:200px;max-width:280px}
+.pvp-result-box .result-title{font-size:22px;margin-bottom:4px}
+.pvp-result-box .result-text{font-size:14px;margin-bottom:2px}
+.pvp-result-box .result-detail{font-size:10px;color:#888;margin-bottom:8px}
+.pvp-result-box .result-record{font-size:10px;color:#555;margin-bottom:12px}
+.pvp-result-box button{padding:6px 24px;background:linear-gradient(135deg,#e94560,#c23152);border:none;border-radius:5px;color:#fff;font-size:12px;cursor:pointer;font-weight:600}
+
+/* SKILL TREE */
+#skills-btn{font-size:11px;padding:4px 10px;background:linear-gradient(135deg,#2a2a5a,#1a1a3e);border:1px solid #4a4a7a;border-radius:4px;color:#f5c518;cursor:pointer;margin-left:6px;white-space:nowrap}
+#skills-btn:hover{border-color:#f5c518}
+#skill-popup{display:none;position:absolute;top:48px;left:0;right:0;bottom:0;background:rgba(0,0,0,.92);z-index:100;padding:16px;overflow-y:auto;backdrop-filter:blur(8px)}
+#skill-popup.open{display:block}
+#skill-popup .close-btn{position:absolute;top:8px;right:12px;font-size:22px;cursor:pointer;color:#666;z-index:2}
+#skill-popup .close-btn:hover{color:#e94560}
+#skill-popup h2{font-size:16px;color:#f5c518;margin-bottom:2px;text-align:center}
+#skill-popup .sp-info{text-align:center;font-size:11px;color:#888;margin-bottom:10px}
+#skill-popup .sp-info .pts{color:#f5c518;font-weight:700}
+.skill-cat{margin-bottom:10px}
+.skill-cat-title{font-size:12px;font-weight:700;color:#e94560;margin-bottom:4px;padding-left:4px}
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:4px}
+.skill-card{background:rgba(255,255,255,.03);border:1px solid #2a2a4a;border-radius:5px;padding:6px 8px;transition:all .15s}
+.skill-card:hover{border-color:#4a4a7a}
+.skill-card .sk-header{display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.skill-card .sk-icon{font-size:14px}
+.skill-card .sk-name{font-size:11px;font-weight:600;color:#ddd;flex:1}
+.skill-card .sk-lv{font-size:9px;color:#666}
+.skill-card .sk-lv .cur{color:#f5c518;font-weight:700}
+.skill-card .sk-desc{font-size:9px;color:#555;margin-bottom:3px;padding-left:18px}
+.skill-card .sk-bar{height:3px;background:#222;border-radius:2px;overflow:hidden;margin-bottom:3px}
+.skill-card .sk-bar .fill{height:100%;background:linear-gradient(90deg,#e94560,#f5c518);border-radius:2px;transition:width .2s}
+.skill-card .sk-btn{width:100%;padding:3px;border:none;border-radius:3px;font-size:9px;cursor:pointer;background:#2a2a5a;color:#888;transition:all .1s}
+.skill-card .sk-btn:hover{background:#3a3a7a;color:#f5c518}
+.skill-card .sk-btn:disabled{opacity:.3;cursor:not-allowed}
+.skill-card .sk-btn.maxed{background:rgba(46,204,113,.15);color:#2ecc71;cursor:default}
+.skill-card .sk-btn.purchasable{background:linear-gradient(135deg,#e94560,#c23152);color:#fff}
+.skill-card .sk-btn.purchasable:hover{box-shadow:0 1px 6px rgba(233,69,96,.4)}
+
 /* PLAYER STATS POPUP (from chat) */
 .player-stats-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,10,25,.97);border:1px solid #2a2a4a;border-radius:10px;padding:20px;z-index:200;min-width:220px;max-width:300px;backdrop-filter:blur(8px);box-shadow:0 8px 32px rgba(0,0,0,.6)}
 .player-stats-popup .psp-header{text-align:center;margin-bottom:12px}
@@ -173,9 +233,11 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
 .player-stats-popup .psp-stat .psp-label{font-size:9px;color:#888;margin-bottom:2px}
 .player-stats-popup .psp-stat .psp-value{font-size:15px;font-weight:700;color:#f5c518}
 .player-stats-popup .psp-stat.span2{grid-column:1/-1}
-.player-stats-popup .psp-close{text-align:center;margin-top:10px}
-.player-stats-popup .psp-close button{padding:5px 20px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#888;font-size:11px;cursor:pointer}
+.player-stats-popup .psp-close{text-align:center;margin-top:10px;display:flex;gap:6px;justify-content:center}
+.player-stats-popup .psp-close button{padding:5px 20px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#888;font-size:11px;cursor:pointer;flex:1;max-width:130px}
 .player-stats-popup .psp-close button:hover{color:#e94560;border-color:#e94560}
+.player-stats-popup .psp-close button:first-child{background:linear-gradient(135deg,#e94560,#c23152);border-color:transparent;color:#fff}
+.player-stats-popup .psp-close button:first-child:hover{box-shadow:0 2px 8px rgba(233,69,96,.4)}
 .player-stats-popup .psp-items{margin-top:10px;border-top:1px solid #2a2a4a;padding-top:8px}
 .player-stats-popup .psp-items .psp-items-title{font-size:11px;color:#888;margin-bottom:4px;text-align:center}
 .player-stats-popup .psp-items .psp-item-row{display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:4px;font-size:10px;background:rgba(255,255,255,.02);margin-bottom:2px}
@@ -193,6 +255,7 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
     <div id="top-info">
       <div id="char-name"></div>
       <div id="char-stats"></div>
+      <button id="skills-btn" onclick="toggleSkills()">🌳 Skills</button>
     </div>
     <div id="wave-display">Wave <span id="wave-num">1</span></div>
     <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
@@ -260,6 +323,11 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
         <div class="slot-item-name empty-text">Wave 100</div>
         <div class="slot-rarity"></div>
       </div>
+      <div class="equip-slot locked" data-slot="mount" onclick="clickSlot('mount')">
+        <div class="slot-label">Mount</div>
+        <div class="slot-item-name empty-text">Wave 1000</div>
+        <div class="slot-rarity"></div>
+      </div>
     </div>
   </div>
 
@@ -297,16 +365,30 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
     <div class="equip-list-popup" id="equip-list-popup"></div>
   </div>
 
+  <!-- Skill Tree Popup -->
+  <div id="skill-popup">
+    <div class="close-btn" onclick="toggleSkills()">✕</div>
+    <h2 id="skill-popup-title">🌳 <span>Skill Tree</span></h2>
+    <div class="sp-info"><span id="skill-pts-label">Skill Points</span>: <span class="pts" id="skill-pts">0</span></div>
+    <div id="skill-tree-content"></div>
+  </div>
+
   <!-- Chat Toggle -->
   <div id="chat-toggle" onclick="toggleChat()">💬</div>
 
   <!-- Chat Panel -->
   <div id="chat-panel">
     <div class="chat-header">
-      <h3 id="chat-header-title">💬 Chat</h3>
+      <div class="chat-tabs">
+        <span class="chat-tab active" id="chat-tab-chat" onclick="switchChatTab('chat')">💬 Chat</span>
+        <span class="chat-tab" id="chat-tab-pvp" onclick="switchChatTab('pvp')">⚔ PVP</span>
+      </div>
       <span class="chat-close" onclick="toggleChat()">✕</span>
     </div>
     <div id="chat-messages"></div>
+    <div id="chat-pvp" style="display:none;flex:1;overflow-y:auto;padding:8px 10px">
+      <div id="pvp-leaderboard"></div>
+    </div>
     <div id="chat-input-row">
       <input id="chat-input" type="text" placeholder="Type a message..." maxlength="200" onkeydown="if(event.key==='Enter')sendChat()">
       <button id="chat-send-btn" onclick="sendChat()">Send</button>
@@ -356,9 +438,53 @@ const ITEM_TYPES = [
   { id:'weapon', icon:'⚔️', label:'Weapon', labelFr:'Arme', unlockWave:0, category:'weapon' },
   { id:'amulet', icon:'📿', label:'Amulet', labelFr:'Amulette', unlockWave:50, category:'armor' },
   { id:'ring', icon:'💍', label:'Ring', labelFr:'Anneau', unlockWave:100, category:'armor' },
+  { id:'mount', icon:'🐴', label:'Mount', labelFr:'Monture', unlockWave:1000, category:'armor' },
 ];
 
-// ========== I18N ==========
+// ========== SKILL TREE ==========
+const SKILL_TREE = [
+  // forge
+  { id:'forgeSpeed', cat:'forge', name:'Swift Forging', desc:'Forges 0.08s faster per level', icon:'⚡', maxLv:5, apply:lv=>G._forgeCdBase=Math.max(0.05,0.4-lv*0.08) },
+  { id:'luckyStrike', cat:'forge', name:'Lucky Strike', desc:'+3% rare+ probability per level', icon:'🍀', maxLv:5, apply:lv=>G._rarityMult=1+lv*0.03 },
+  { id:'efficientDiscard', cat:'forge', name:'Efficient Discard', desc:'+10% forge XP from discarding per level', icon:'♻️', maxLv:5, apply:lv=>G._discardMult=1+lv*0.1 },
+  { id:'itemBoost', cat:'forge', name:'Item Boost', desc:'+1 forged item level per 2 levels', icon:'📈', maxLv:5, apply:lv=>G._itemLvBonus=Math.floor(lv/2) },
+  { id:'doubleForge', cat:'forge', name:'Double Forge', desc:'% double forge chance: 3/6/10/15/20%', icon:'✨', maxLv:5, apply:lv=>G._doubleChance=[0,3,6,10,15,20][lv] },
+  // combat
+  { id:'powerTraining', cat:'combat', name:'Power Training', desc:'+1 base damage per level', icon:'💪', maxLv:5, apply:lv=>G._dmgBonus=lv },
+  { id:'endurance', cat:'combat', name:'Endurance', desc:'+12 max HP per level', icon:'❤️', maxLv:5, apply:lv=>G._hpBonus=lv*12 },
+  { id:'swiftStrikes', cat:'combat', name:'Swift Strikes', desc:'+4% attack speed per level', icon:'🏃', maxLv:5, apply:lv=>G._atkSpdBonus=lv*4 },
+  { id:'comboMastery', cat:'combat', name:'Combo Mastery', desc:'+3% combo chance per level', icon:'🔥', maxLv:5, apply:lv=>G._comboBonus=lv*3 },
+  { id:'vampiricTouch', cat:'combat', name:'Vampiric Touch', desc:'+2% lifesteal per level', icon:'🩸', maxLv:5, apply:lv=>G._lifestealBonus=lv*2 },
+  // defense
+  { id:'armorCraft', cat:'defense', name:'Armor Craft', desc:'+4 armor HP per level', icon:'🛡️', maxLv:5, apply:lv=>G._armorBonus=lv*4 },
+  { id:'blockMastery', cat:'defense', name:'Block Mastery', desc:'+3% block chance per level', icon:'🚧', maxLv:5, apply:lv=>G._blockBonus=lv*3 },
+  { id:'evasion', cat:'defense', name:'Evasion', desc:'+3% evade chance per level', icon:'💨', maxLv:5, apply:lv=>G._evadeBonus=lv*3 },
+  { id:'regeneration', cat:'defense', name:'Regeneration', desc:'+2 HP regen per level', icon:'🌿', maxLv:5, apply:lv=>G._regenBonus=lv*2 },
+  { id:'secondWind', cat:'defense', name:'Second Wind', desc:'Restore 3% max HP on kill per level', icon:'💚', maxLv:5, apply:lv=>G._killHealPct=lv*3 },
+  // wave
+  { id:'bountyHunter', cat:'wave', name:'Bounty Hunter', desc:'+1 forge XP per kill per level', icon:'💰', maxLv:5, apply:lv=>G._xpKillBonus=lv },
+  { id:'waveRunner', cat:'wave', name:'Wave Runner', desc:'+1 enemy per wave per level', icon:'🌊', maxLv:5, apply:lv=>G._waveBonus=lv },
+  { id:'bossSlayer', cat:'wave', name:'Boss Slayer', desc:'+5% boss damage per level', icon:'🎯', maxLv:5, apply:lv=>G._bossDmgMult=1+lv*0.05 },
+  { id:'survivalist', cat:'wave', name:'Survivalist', desc:'+5% wave XP per level', icon:'📖', maxLv:5, apply:lv=>G._waveXpMult=1+lv*0.05 },
+  { id:'overlord', cat:'wave', name:'Overlord', desc:'+1 enemy slot per level', icon:'👑', maxLv:5, apply:lv=>G._slotBonus=lv },
+];
+
+function applySkills() {
+  G._forgeCdBase=0.4;G._rarityMult=1;G._discardMult=1;G._itemLvBonus=0;G._doubleChance=0;
+  G._dmgBonus=0;G._hpBonus=0;G._atkSpdBonus=0;G._comboBonus=0;G._lifestealBonus=0;
+  G._armorBonus=0;G._blockBonus=0;G._evadeBonus=0;G._regenBonus=0;G._killHealPct=0;
+  G._xpKillBonus=0;G._waveBonus=0;G._bossDmgMult=1;G._waveXpMult=1;G._slotBonus=0;
+  for (const sk of SKILL_TREE) {
+    if (G.skills[sk.id]) sk.apply(G.skills[sk.id]);
+  }
+}
+
+function recalcSkillPoints() {
+  const earned = G.forgeLv + Math.floor(G.totalWavesCleared / 5);
+  let spent = 0;
+  for (const sk of SKILL_TREE) spent += G.skills[sk.id] || 0;
+  G.skillPoints = isAllMaxed() ? 0 : earned - spent;
+}
 const LANG_STRINGS = {
   en: {
     playerName:'Forging Master', wave:'Wave', level:'Level', enemiesLeft:'enemies left', combatPower:'Combat Power',
@@ -394,6 +520,14 @@ const LANG_STRINGS = {
     joined:'{name} joined the game!', left:'{name} left the game.',
     // stats popup labels
     labelCombatPower:'Combat Power', labelForgeLevel:'Forge Level', labelWave:'Wave',
+    // pvp
+    pvpTab:'PVP', pvpLeaderboard:'⚔ PVP Leaderboard', pvpRank:'Rk', pvpWins:'W', pvpLosses:'L', pvpRatio:'W/L',
+    pvpFight:'⚔ Fight!', pvpFightSelf:'Can\'t fight yourself!',
+    pvpVictory:'🎉 Victory!', pvpDefeat:'💀 Defeated!',
+    pvpWonAgainst:'You beat {name}!', pvpLostAgainst:'{name} beat you...',
+    pvpRecord:'Record: {w}W {l}L', pvpWinDetail:'✨ +1 Win', pvpLossDetail:'💔 +1 Loss',
+    skillPts:'🌳 Skill Pts', skillTree:'Skill Tree',
+    setBonus:'Set Bonus', setNone:'No Set Bonus',
   },
   fr: {
     playerName:'Maître Forgeron', wave:'Vague', level:'Niveau', enemiesLeft:'ennemis restants', combatPower:'Puissance de Combat',
@@ -425,6 +559,13 @@ const LANG_STRINGS = {
     equippedItems:'Objets Équipés', noItems:'Aucun objet équipé',
     joined:'{name} a rejoint le jeu !', left:'{name} a quitté le jeu.',
     labelCombatPower:'Puissance de Combat', labelForgeLevel:'Niveau de Forge', labelWave:'Vague',
+    pvpTab:'PVP', pvpLeaderboard:'⚔ Classement PVP', pvpRank:'Cl', pvpWins:'V', pvpLosses:'D', pvpRatio:'V/D',
+    pvpFight:'⚔ Combattre !', pvpFightSelf:'Impossible de se combattre soi-même !',
+    pvpVictory:'🎉 Victoire !', pvpDefeat:'💀 Défaite !',
+    pvpWonAgainst:'Vous avez battu {name} !', pvpLostAgainst:'{name} vous a battu...',
+    pvpRecord:'Palmarès: {w}V {l}D', pvpWinDetail:'✨ +1 Victoire', pvpLossDetail:'💔 +1 Défaite',
+    skillPts:'🌳 Pts Compétence', skillTree:'Compétences',
+    setBonus:'Bonus d\'Ensemble', setNone:'Aucun Bonus d\'Ensemble',
   }
 };
 const LANG = (navigator.language||'').startsWith('fr')?'fr':'en';
@@ -457,7 +598,7 @@ const MOVE_SPEED = 45;
 let G = {
   forgeLv: 1, forgeXp: 0, isUpgrading: false, upgradeTimeLeft: 0,
   currentItem: null,
-  equipped: { helmet:null, chestplate:null, gloves:null, belt:null, boots:null, weapon:null, amulet:null, ring:null },
+  equipped: { helmet:null, chestplate:null, gloves:null, belt:null, boots:null, weapon:null, amulet:null, ring:null, mount:null },
   wave: 1, totalWavesCleared: 0,
   enemiesThisWave: 1, enemiesRemaining: 1,
   charHp: BASE_HP, charMaxHp: BASE_HP,
@@ -471,7 +612,37 @@ let G = {
   autoForge: false, autoForgeTimer: 0, autoForgeMinRarity: 0,
   playerName: 'Forging Master', gender: 'male',
   viewingSlot: null,
+  pvpWins: 0, pvpLosses: 0,
+  skillPoints: 0,
+  skills: {
+    forgeSpeed:0, luckyStrike:0, efficientDiscard:0, itemBoost:0, doubleForge:0,
+    powerTraining:0, endurance:0, swiftStrikes:0, comboMastery:0, vampiricTouch:0,
+    armorCraft:0, blockMastery:0, evasion:0, regeneration:0, secondWind:0,
+    bountyHunter:0, waveRunner:0, bossSlayer:0, survivalist:0, overlord:0
+  },
 };
+
+// ========== PVP BOTS ==========
+const PVP_BOTS = [
+  { name:'IronSmith', icon:'👨🏻', power:48, forgeLv:14, wave:7, wins:22, losses:8 },
+  { name:'FlameForge', icon:'👨🏻', power:52, forgeLv:16, wave:9, wins:18, losses:5 },
+  { name:'CrystalMage', icon:'👩🏻', power:44, forgeLv:11, wave:6, wins:14, losses:10 },
+  { name:'ShadowBlade', icon:'👨🏻', power:56, forgeLv:18, wave:10, wins:30, losses:12 },
+  { name:'ThunderSmash', icon:'👨🏻', power:40, forgeLv:10, wave:5, wins:8, losses:6 },
+  { name:'FrostArrow', icon:'👩🏻', power:50, forgeLv:15, wave:8, wins:25, losses:9 },
+  { name:'EmberHeart', icon:'🐱', power:36, forgeLv:9, wave:4, wins:5, losses:7 },
+  { name:'StormBringer', icon:'👨🏻', power:60, forgeLv:20, wave:12, wins:35, losses:15 },
+  { name:'SilverLily', icon:'👩🏻', power:42, forgeLv:12, wave:6, wins:12, losses:4 },
+  { name:'ObsidianFist', icon:'👨🏻', power:54, forgeLv:17, wave:9, wins:28, losses:11 },
+  { name:'DuskWalker', icon:'🐱', power:38, forgeLv:10, wave:5, wins:7, losses:3 },
+  { name:'BrightFlame', icon:'👨🏻', power:46, forgeLv:13, wave:7, wins:16, losses:8 },
+  { name:'MoonWhisper', icon:'👩🏻', power:58, forgeLv:19, wave:11, wins:32, losses:14 },
+  { name:'StoneGuard', icon:'👨🏻', power:34, forgeLv:8, wave:4, wins:4, losses:9 },
+  { name:'WindRunner', icon:'👩🏻', power:62, forgeLv:21, wave:13, wins:40, losses:10 },
+];
+
+let pvpBotSeeded = false;
+const pvpOpponents = {};
 
 // ========== HELPERS ==========
 function rand(a,b){return Math.random()*(b-a)+a}
@@ -508,8 +679,8 @@ function getForgeProbabilities(){
   if(!o.length){if(hasCommon)return{Common:100};return probs}
   let total=0;const ws=o.map(r=>{
     const diff=lv-r.minForgeLv;
-    let mult=1;
-    if(r.rarityWeight!==undefined){const raw=r.rarityWeight*Math.pow(1.3,diff);if(raw<1)mult=raw}
+    let mult=G._rarityMult;
+    if(r.rarityWeight!==undefined){const raw=r.rarityWeight*Math.pow(1.3,diff);if(raw<1)mult*=raw}
     const w=Math.max(1,diff+1)*mult;total+=w;return{name:r.name,weight:w}
   });
   const rem=100-cw;ws.forEach(w=>{probs[w.name]=(w.weight/total)*rem});
@@ -524,7 +695,7 @@ function rollRarity(){
 
 function generateItem(){
   const types=ITEM_TYPES.filter(t=>G.wave>=t.unlockWave),type=pick(types);
-  const rarity=rollRarity(),itemLv=Math.max(1,G.forgeLv+randInt(-1,2)),ri=RARITIES.indexOf(rarity);
+  const rarity=rollRarity(),itemLv=Math.max(1,G.forgeLv+randInt(-1,2)+G._itemLvBonus),ri=RARITIES.indexOf(rarity);
   const item={type:type.id,typeLabel:type.label,typeLabelFr:type.labelFr||type.label,icon:type.icon,rarity:rarity.name,rarityIndex:ri,level:itemLv,substats:[],hp:0,damage:0,weaponStyle:null,range:false};
   if(type.category==='weapon'){
     const ws=pick(WEAPON_STYLES);item.weaponStyle=ws.id;item.icon=ws.icon;item.typeLabel=ws.label;item.typeLabelFr=ws.labelFr||ws.label;
@@ -542,11 +713,15 @@ function generateItem(){
 }
 
 function getItemPower(item){let t=item.damage+item.hp;item.substats.forEach(s=>{t+=s.suffix==='%'?s.value/5:s.value});return Math.round(t)}
+function calcSetPct(ri,count){const b=3+ri*3;if(count>=9)return Math.round(b*5*10)/10;if(count>=6)return Math.round(b*3*10)/10;if(count>=4)return Math.round(b*2*10)/10;if(count>=2)return Math.round(b*10)/10;return 0}
+function getSetBonusInfo(){const c={};for(const item of Object.values(G.equipped))if(item)c[item.rarityIndex]=(c[item.rarityIndex]||0)+1;let ri=-1,co=0,pct=0;for(const[k,v]of Object.entries(c)){const p=calcSetPct(parseInt(k),v);if(p>pct){pct=p;ri=parseInt(k);co=v}}return{ri,count:co,pct}}
 
 function getCharacterStats(){
-  const s={damage:BASE_DAMAGE,hp:0,attackSpeed:BASE_ATTACK_SPEED,comboChance:0,lifestealChance:0,bonusDamage:0,blockChance:0,evadeChance:0,hpRegen:0};
+  const s={damage:BASE_DAMAGE+G._dmgBonus,hp:G._hpBonus+G._armorBonus,attackSpeed:BASE_ATTACK_SPEED+G._atkSpdBonus,comboChance:G._comboBonus,lifestealChance:G._lifestealBonus,bonusDamage:0,blockChance:G._blockBonus,evadeChance:G._evadeBonus,hpRegen:G._regenBonus};
   G.hasRanged=false;
   for(const item of Object.values(G.equipped)){if(!item)continue;s.damage+=item.damage||0;s.hp+=item.hp||0;if(item.range)G.hasRanged=true;item.substats.forEach(x=>{if(s[x.id]!==undefined)s[x.id]+=x.value})}
+  const set=getSetBonusInfo();if(set.pct>0){const m=1+set.pct/100;for(const k of Object.keys(s))s[k]=Math.round(s[k]*m*10)/10}
+  s.lifestealChance=Math.min(50,s.lifestealChance);
   return s;
 }
 
@@ -570,13 +745,15 @@ function getMobStats(statMult=1){
 }
 
 // ========== CORE GAME LOGIC ==========
-function forgeItem(){if(G.isUpgrading||G.forgeCooldown>0)return;G.forgeCooldown=0.4;G.currentItem=generateItem();renderItemPreview();render()}
+function forgeItem(){if(G.isUpgrading||G.forgeCooldown>0)return;G.forgeCooldown=G._forgeCdBase;G.currentItem=generateItem();if(G._doubleChance>0&&Math.random()*100<G._doubleChance){const d=generateItem();if(d.power>G.currentItem.power)G.currentItem=d}renderItemPreview();render()}
 function equipCurrentItem(){if(!G.currentItem)return;const s=G.currentItem.type;if(G.equipped[s])addForgeXp(G.equipped[s]);G.equipped[s]=G.currentItem;G.currentItem=null;recalcCharHp();renderItemPreview();render();if(chatConnected)sendChatUpdate()}
 function discardCurrentItem(){if(!G.currentItem)return;addForgeXp(G.currentItem);G.currentItem=null;renderItemPreview();render()}
-function addForgeXp(item){G.forgeXp+=Math.max(2,Math.floor(getItemPower(item)/2)+2+item.rarityIndex*3);render()}
+function addForgeXp(item){const a=Math.round((Math.max(2,Math.floor(getItemPower(item)/2)+2+item.rarityIndex*3))*G._discardMult);addRawForgeXp(a);render()}
+function isAllMaxed(){if(G.forgeLv<MAX_FORGE_LV)return false;for(const sk of SKILL_TREE)if((G.skills[sk.id]||0)<sk.maxLv)return false;return true}
+function addRawForgeXp(amount){if(isAllMaxed())return;if(G.forgeLv>=MAX_FORGE_LV){G.forgeXp+=amount;const pts=Math.floor(G.forgeXp/1000);if(pts>0){G.skillPoints+=pts;G.forgeXp-=pts*1000}}else{G.forgeXp+=amount}}
 const MAX_FORGE_LV = 50;
 function startUpgrade(){if(G.isUpgrading||G.forgeLv>=MAX_FORGE_LV)return;const n=forgeXpForLevel(G.forgeLv);if(G.forgeXp<n)return;G.forgeXp-=n;G.isUpgrading=true;G.upgradeTimeLeft=getUpgradeTime(G.forgeLv);render()}
-function completeUpgrade(){G.forgeLv++;G.isUpgrading=false;G.upgradeTimeLeft=0;render();if(G.autoForge){G.autoForge=false;render()}}
+function completeUpgrade(){G.forgeLv++;G.isUpgrading=false;G.upgradeTimeLeft=0;if(!isAllMaxed())G.skillPoints++;applySkills();render();if(G.autoForge){G.autoForge=false;render()}}
 function unequipSlot(s){if(!G.equipped[s])return;addForgeXp(G.equipped[s]);G.equipped[s]=null;recalcCharHp();render();if(chatConnected)sendChatUpdate()}
 function clickSlot(s){
   const t=ITEM_TYPES.find(x=>x.id===s);if(!t||G.wave<t.unlockWave)return;
@@ -628,8 +805,11 @@ function toggleFullscreen(){
 // ========== COMBAT ==========
 function initWave(){
   G.charHp=G.charMaxHp;
+  recalcSkillPoints();
   const isBoss=G.wave%10===0,isHorde=!isBoss&&G.wave%5===0;
-  G.enemiesThisWave=isBoss?1:(isHorde?5:randInt(1,3));
+  if(isBoss)G.enemiesThisWave=1;
+  else if(isHorde)G.enemiesThisWave=5+G._waveBonus+G._slotBonus;
+  else G.enemiesThisWave=Math.min(8,randInt(1,3)+G._waveBonus+G._slotBonus);
   G.enemiesRemaining=G.enemiesThisWave;
   G.playerX=15;
   spawnEnemies();
@@ -727,6 +907,8 @@ function combatTick(dt){
   const aliveCount=G.enemies.filter(e=>e.alive).length;
   if(aliveCount===0){
     G.wave++;G.totalWavesCleared++;
+    const waveXp=Math.round(G.wave*G._waveXpMult);
+    addRawForgeXp(waveXp);
     G.log=t('waveCleared',{n:G.wave-1,c:G.enemiesThisWave});
     initWave();
     return;
@@ -751,13 +933,15 @@ function combatTick(dt){
       if(total<1)total=1;
       const target=getClosestEnemy();
       if(target){
+        if(target.isBoss)total=Math.round(total*G._bossDmgMult);
         target.hp-=total;
         const killed=target.hp<=0;
         if(killed){
           target.alive=false;target.hp=0;
-          const xp=target.isBoss?G.wave*2:G.wave;
-          G.forgeXp+=xp;
+          const xp=(target.isBoss?G.wave*2:G.wave)+G._xpKillBonus;
+          addRawForgeXp(xp);
           G.log=target.isBoss?t('bossSlain',{n:target.id+1,xp}):t('enemySlain',{n:target.id+1,xp});
+          if(G._killHealPct>0)G.charHp=Math.min(G.charMaxHp,G.charHp+Math.round(G.charMaxHp*G._killHealPct/100));
         }
         else{G.log=hits>1?t('combo',{dmg:total,hits}):`${total} dmg`}
         const ls=stats.lifestealChance||0;if(Math.random()*100<ls)G.charHp=Math.min(G.charMaxHp,G.charHp+Math.round(total*rand(0.1,0.3)));
@@ -798,12 +982,12 @@ function render(){
   const needed=forgeXpForLevel(G.forgeLv);
   document.getElementById('forge-lv-label').textContent=t('forgeLevel');
   document.getElementById('forge-lv').textContent=G.forgeLv;
-  document.getElementById('forge-xp-fill').style.width=Math.min(100,(G.forgeXp/needed)*100)+'%';
-  const xpLbl=document.getElementById('forge-xp-label');if(xpLbl)xpLbl.textContent=t('xp');
-  document.getElementById('forge-xp').textContent=G.forgeXp;
-  document.getElementById('forge-xp-next').textContent=needed;
   const atMax=G.forgeLv>=MAX_FORGE_LV;
-  document.getElementById('forge-upgrade-btn').disabled=atMax||G.isUpgrading||G.forgeXp<needed;
+  document.getElementById('forge-xp-fill').style.width=atMax?'100%':Math.min(100,(G.forgeXp/needed)*100)+'%';
+  const xpLbl=document.getElementById('forge-xp-label');if(xpLbl)xpLbl.textContent=t('xp');
+  document.getElementById('forge-xp').textContent=atMax?'MAX':G.forgeXp;
+  document.getElementById('forge-xp-next').textContent=atMax?'':needed;
+  document.getElementById('forge-upgrade-btn').disabled=atMax||G.isUpgrading||(!atMax&&G.forgeXp<needed);
   document.getElementById('upgrade-btn-label').textContent=t('upgrade');
   document.getElementById('upgrade-cost-label').textContent=atMax?t('max'):`${t('cost')} ${needed} XP`;
   document.getElementById('forge-btn').textContent=t('forge');
@@ -964,8 +1148,11 @@ function renderStatsPopup(){
   document.getElementById('gender-select').value=G.gender;
   const stats=getCharacterStats(),grid=document.getElementById('stats-grid');grid.innerHTML='';
   const combatPower=getTotalItemPower()+BASE_DAMAGE;
-  const e=[{label:t('labelCombatPower'),value:combatPower,suffix:''},{label:t('statAtk'),value:stats.damage,suffix:''},{label:t('statBonusDmg'),value:stats.bonusDamage,suffix:''},{label:t('statMaxHp'),value:G.charMaxHp,suffix:''},{label:t('statArmorHp'),value:stats.hp,suffix:''},{label:t('statHpRegen'),value:(1+(stats.hpRegen||0)).toFixed(1),suffix:'/s'},{label:t('statAtkSpd'),value:stats.attackSpeed.toFixed(1),suffix:'%'},{label:t('statCombo'),value:stats.comboChance.toFixed(1),suffix:'%'},{label:t('statLifesteal'),value:stats.lifestealChance.toFixed(1),suffix:'%'},{label:t('statBlock'),value:stats.blockChance.toFixed(1),suffix:'%'},{label:t('statEvade'),value:stats.evadeChance.toFixed(1),suffix:'%'},{label:t('statItemPower'),value:getTotalItemPower(),suffix:''}];
+  const e=[{label:t('labelCombatPower'),value:combatPower,suffix:''},{label:t('skillPts'),value:G.skillPoints,suffix:''},{label:t('statAtk'),value:stats.damage,suffix:''},{label:t('statBonusDmg'),value:stats.bonusDamage,suffix:''},{label:t('statMaxHp'),value:G.charMaxHp,suffix:''},{label:t('statArmorHp'),value:stats.hp,suffix:''},{label:t('statHpRegen'),value:(1+(stats.hpRegen||0)).toFixed(1),suffix:'/s'},{label:t('statAtkSpd'),value:stats.attackSpeed.toFixed(1),suffix:'%'},{label:t('statCombo'),value:stats.comboChance.toFixed(1),suffix:'%'},{label:t('statLifesteal'),value:stats.lifestealChance.toFixed(1),suffix:'%'},{label:t('statBlock'),value:stats.blockChance.toFixed(1),suffix:'%'},{label:t('statEvade'),value:stats.evadeChance.toFixed(1),suffix:'%'},{label:t('statItemPower'),value:getTotalItemPower(),suffix:''}];
   e.forEach(x=>{const d=document.createElement('div');d.className='stat-item';d.innerHTML=`<span class="label">${x.label}</span><span class="value">${x.value}${x.suffix}</span>`;grid.appendChild(d)});
+  const set=getSetBonusInfo();const sd=document.createElement('div');sd.className='stat-item';sd.style.cssText='display:flex;justify-content:space-between;padding:3px 8px;font-size:10px;background:rgba(245,197,24,.05);border-radius:4px;margin-top:4px';
+  if(set.pct>0){const col=rarityColor(RARITIES[set.ri].name);sd.innerHTML=`<span class="label">${t('setBonus')}</span><span style="color:${col}">${tn(RARITIES[set.ri].name)} ${set.count}pc <strong>+${set.pct}%</strong></span>`}else{sd.innerHTML=`<span class="label">${t('setBonus')}</span><span style="color:#555">${t('setNone')}</span>`}
+  grid.appendChild(sd);
   const lc=document.getElementById('equip-list-popup');lc.innerHTML='<div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;border-top:1px solid #2a2a4a;padding-top:8px">'+t('equippedItems')+'</div>';
   ITEM_TYPES.forEach(slot=>{
     const item=G.equipped[slot.id],d=document.createElement('div');
@@ -1022,8 +1209,10 @@ function resetGame(){
   if(!confirm(t('resetConfirm')))return;
   localStorage.removeItem('forgeMasterSave');
   G.forgeLv=1;G.forgeXp=0;G.isUpgrading=false;G.upgradeTimeLeft=0;G.currentItem=null;G.autoForge=false;G.autoForgeMinRarity=0;
-  G.equipped={helmet:null,chestplate:null,gloves:null,belt:null,boots:null,weapon:null,amulet:null,ring:null};
+  G.equipped={helmet:null,chestplate:null,gloves:null,belt:null,boots:null,weapon:null,amulet:null,ring:null,mount:null};
   G.wave=1;G.totalWavesCleared=0;G.charHp=BASE_HP;G.charMaxHp=BASE_HP;G.playerName='Forging Master';G.gender='male';
+  G.pvpWins=0;G.pvpLosses=0;
+  G.skillPoints=0;for(const k of Object.keys(G.skills))G.skills[k]=0;
   G.enemies=[];G.viewingSlot=null;
   recalcCharHp();initWave();render();renderItemPreview();
   document.getElementById('stats-popup').classList.remove('open');
@@ -1032,17 +1221,17 @@ function resetGame(){
 
 // ========== SAVE/LOAD ==========
 function saveGame(){
-  const data={forgeLv:G.forgeLv,forgeXp:G.forgeXp,isUpgrading:G.isUpgrading,upgradeTimeLeft:G.upgradeTimeLeft,equipped:{},wave:G.wave,totalWavesCleared:G.totalWavesCleared,charHp:G.charHp,enemiesThisWave:G.enemiesThisWave,playerName:G.playerName,gender:G.gender,autoForgeMinRarity:G.autoForgeMinRarity};
+  const data={forgeLv:G.forgeLv,forgeXp:G.forgeXp,isUpgrading:G.isUpgrading,upgradeTimeLeft:G.upgradeTimeLeft,equipped:{},wave:G.wave,totalWavesCleared:G.totalWavesCleared,charHp:G.charHp,enemiesThisWave:G.enemiesThisWave,playerName:G.playerName,gender:G.gender,autoForgeMinRarity:G.autoForgeMinRarity,pvpWins:G.pvpWins,pvpLosses:G.pvpLosses,skills:{...G.skills}};
   for(const[s,i]of Object.entries(G.equipped))data.equipped[s]=i?JSON.parse(JSON.stringify(i)):null;
   try{localStorage.setItem('forgeMasterSave',JSON.stringify(data))}catch(e){}
 }
 function loadGame(){
-  try{const raw=localStorage.getItem('forgeMasterSave');if(!raw)return false;const d=JSON.parse(raw);G.forgeLv=d.forgeLv||1;G.forgeXp=d.forgeXp||0;G.isUpgrading=d.isUpgrading||false;G.upgradeTimeLeft=d.upgradeTimeLeft||0;G.wave=d.wave||1;G.totalWavesCleared=d.totalWavesCleared||0;G.charHp=d.charHp||BASE_HP;G.enemiesThisWave=d.enemiesThisWave||1;if(d.equipped){for(const[s,i]of Object.entries(d.equipped))G.equipped[s]=i||null}if(d.playerName)G.playerName=d.playerName;if(d.gender)G.gender=d.gender;if(d.autoForgeMinRarity!==undefined)G.autoForgeMinRarity=d.autoForgeMinRarity;return true}catch(e){return false}
+  try{const raw=localStorage.getItem('forgeMasterSave');if(!raw)return false;const d=JSON.parse(raw);G.forgeLv=d.forgeLv||1;G.forgeXp=d.forgeXp||0;G.isUpgrading=d.isUpgrading||false;G.upgradeTimeLeft=d.upgradeTimeLeft||0;G.wave=d.wave||1;G.totalWavesCleared=d.totalWavesCleared||0;G.charHp=d.charHp||BASE_HP;G.enemiesThisWave=d.enemiesThisWave||1;if(d.equipped){for(const[s,i]of Object.entries(d.equipped))G.equipped[s]=i||null}if(d.playerName)G.playerName=d.playerName;if(d.gender)G.gender=d.gender;if(d.autoForgeMinRarity!==undefined)G.autoForgeMinRarity=d.autoForgeMinRarity;if(d.pvpWins!==undefined)G.pvpWins=d.pvpWins;if(d.pvpLosses!==undefined)G.pvpLosses=d.pvpLosses;if(d.skills)for(const[k,v]of Object.entries(d.skills))if(G.skills[k]!==undefined)G.skills[k]=v;return true}catch(e){return false}
 }
 
 // ========== INIT ==========
 function init(){
-  loadGame();recalcCharHp();initWave();render();renderItemPreview();
+  loadGame();applySkills();recalcSkillPoints();recalcCharHp();initWave();render();renderItemPreview();
   requestAnimationFrame(gameLoop);
   setInterval(()=>{render();renderItemPreview()},500);
   setInterval(()=>{saveGame();if(chatConnected)sendChatUpdate()},10000);
@@ -1205,6 +1394,191 @@ function escapeHtml(t) {
   return d.innerHTML;
 }
 
+// ========== SKILL TREE ==========
+function toggleSkills() {
+  const popup = document.getElementById('skill-popup');
+  popup.classList.toggle('open');
+  if (popup.classList.contains('open')) renderSkillTree();
+}
+
+function renderSkillTree() {
+  document.getElementById('skill-pts').textContent = G.skillPoints;
+  const cats = { forge:'⚒ Forging', combat:'⚔ Combat', defense:'🛡 Defense', wave:'🌊 Wave' };
+  const c = document.getElementById('skill-tree-content');
+  c.innerHTML = '';
+  for (const [catId, catLabel] of Object.entries(cats)) {
+    const skills = SKILL_TREE.filter(s => s.cat === catId);
+    const div = document.createElement('div');
+    div.className = 'skill-cat';
+    div.innerHTML = `<div class="skill-cat-title">${catLabel}</div><div class="skill-grid"></div>`;
+    const grid = div.querySelector('.skill-grid');
+    for (const sk of skills) {
+      const lv = G.skills[sk.id] || 0;
+      const maxed = lv >= sk.maxLv;
+      const cost = 1;
+      const canBuy = G.skillPoints >= cost && !maxed;
+      const pct = (lv / sk.maxLv) * 100;
+      const card = document.createElement('div');
+      card.className = 'skill-card';
+      let btnClass = 'sk-btn';
+      if (maxed) btnClass += ' maxed';
+      else if (canBuy) btnClass += ' purchasable';
+      card.innerHTML = `<div class="sk-header"><span class="sk-icon">${sk.icon}</span><span class="sk-name">${sk.name}</span><span class="sk-lv"><span class="cur">${lv}</span>/${sk.maxLv}</span></div>
+        <div class="sk-desc">${sk.desc}</div>
+        <div class="sk-bar"><div class="fill" style="width:${pct}%"></div></div>
+        <button class="${btnClass}" ${canBuy?'':'disabled'}>${maxed?'MAX':(canBuy?'+1 ('+cost+' pt)':'Locked')}</button>`;
+      const btn = card.querySelector('button');
+      if (canBuy) btn.onclick = () => { purchaseSkill(sk.id); renderSkillTree(); };
+      grid.appendChild(card);
+    }
+    c.appendChild(div);
+  }
+}
+
+function purchaseSkill(id) {
+  const sk = SKILL_TREE.find(s => s.id === id);
+  if (!sk) return;
+  const lv = G.skills[id] || 0;
+  if (lv >= sk.maxLv || G.skillPoints < 1) return;
+  G.skills[id] = lv + 1;
+  G.skillPoints--;
+  applySkills();
+  saveGame();
+  render();
+  renderItemPreview();
+}
+
+// ========== PVP ==========
+function switchChatTab(tab) {
+  document.getElementById('chat-messages').style.display = tab === 'chat' ? 'flex' : 'none';
+  document.getElementById('chat-input-row').style.display = tab === 'chat' ? 'flex' : 'none';
+  document.getElementById('chat-pvp').style.display = tab === 'pvp' ? 'block' : 'none';
+  document.getElementById('chat-tab-chat').className = 'chat-tab' + (tab === 'chat' ? ' active' : '');
+  document.getElementById('chat-tab-pvp').className = 'chat-tab' + (tab === 'pvp' ? ' active' : '');
+  if (tab === 'pvp') renderLeaderboard();
+}
+
+function getAllPvpPlayers() {
+  const players = [];
+  const selfPower = getTotalItemPower() + BASE_DAMAGE;
+  players.push({
+    name: G.playerName || 'Forging Master',
+    icon: G.gender === 'cat' ? '🐱' : (G.gender === 'female' ? '👩🏻' : '👨🏻'),
+    power: selfPower,
+    forgeLv: G.forgeLv,
+    wave: G.wave,
+    wins: G.pvpWins,
+    losses: G.pvpLosses,
+    isSelf: true
+  });
+  if (!pvpBotSeeded) { pvpBotSeeded = true; seedBotResults(); }
+  for (const bot of PVP_BOTS) {
+    players.push({
+      name: bot.name,
+      icon: bot.icon,
+      power: bot.power,
+      forgeLv: bot.forgeLv,
+      wave: bot.wave,
+      wins: bot.wins,
+      losses: bot.losses,
+      isSelf: false
+    });
+  }
+  return players.sort((a, b) => {
+    const ratioA = (a.losses + a.wins) > 0 ? a.wins / Math.max(1, a.losses) : a.wins;
+    const ratioB = (b.losses + b.wins) > 0 ? b.wins / Math.max(1, b.losses) : b.wins;
+    if (ratioB !== ratioA) return ratioB - ratioA;
+    return (b.wins + b.losses) - (a.wins + a.losses);
+  });
+}
+
+function renderLeaderboard() {
+  const c = document.getElementById('pvp-leaderboard');
+  if (!c) return;
+  const players = getAllPvpPlayers();
+  let h = '<div class="pvp-lb-title">' + t('pvpLeaderboard') + '</div>';
+  for (let i = 0; i < players.length; i++) {
+    const p = players[i];
+    const ratio = (p.losses + p.wins) > 0 ? (p.wins / Math.max(1, p.losses)).toFixed(2) : '-';
+    const isSelf = p.isSelf ? ' self' : '';
+    h += `<div class="pvp-lb-row${isSelf}">
+      <span class="pvp-lb-rank">${i + 1}</span>
+      <span class="pvp-lb-icon">${p.icon}</span>
+      <span class="pvp-lb-name">${escapeHtml(p.name)}</span>
+      <span class="pvp-lb-stat">⚡<span class="val">${p.power}</span></span>
+      <span class="pvp-lb-stat">${t('pvpWins')}<span class="val">${p.wins}</span></span>
+      <span class="pvp-lb-stat">${t('pvpLosses')}<span class="val">${p.losses}</span></span>
+      <span class="pvp-lb-ratio"><span class="val" style="color:${ratio !== '-' && parseFloat(ratio) >= 1 ? '#2ecc71' : '#e94560'}">${ratio}</span></span>
+    </div>`;
+  }
+  c.innerHTML = h;
+}
+
+function seedBotResults() {
+  const existing = localStorage.getItem('pvpBotData');
+  if (existing) {
+    try {
+      const d = JSON.parse(existing);
+      for (let i = 0; i < PVP_BOTS.length; i++) {
+        if (d[i]) { PVP_BOTS[i].wins = d[i].wins || 0; PVP_BOTS[i].losses = d[i].losses || 0; }
+      }
+    } catch (e) { /* ignore */ }
+  }
+}
+
+function saveBotData() {
+  const d = PVP_BOTS.map(b => ({ wins: b.wins, losses: b.losses }));
+  try { localStorage.setItem('pvpBotData', JSON.stringify(d)); } catch (e) { /* ignore */ }
+}
+
+function fightPlayer(targetName) {
+  if (targetName === G.playerName || targetName === (G.playerName || 'Forging Master')) {
+    alert(t('pvpFightSelf'));
+    return;
+  }
+  const existing = document.getElementById('player-stats-popup');
+  if (existing) existing.remove();
+  const players = getAllPvpPlayers();
+  let target = players.find(p => p.name === targetName);
+  if (!target && pvpOpponents[targetName]) {
+    const opp = pvpOpponents[targetName];
+    target = { name: targetName, icon: opp.icon, power: opp.power, forgeLv: opp.forgeLv, wave: opp.wave, wins: 0, losses: 0, isSelf: false };
+  }
+  if (!target) return;
+  const selfPower = getTotalItemPower() + BASE_DAMAGE;
+  const selfRating = selfPower + G.forgeLv * 0.5 + G.wave * 0.3;
+  const targetRating = target.power + target.forgeLv * 0.5 + target.wave * 0.3;
+  const total = selfRating + targetRating;
+  const selfChance = total > 0 ? selfRating / total : 0.5;
+  const roll = Math.random();
+  const won = roll < selfChance;
+  if (won) { G.pvpWins++; } else { G.pvpLosses++; }
+  if (!target.isSelf) { if (won) target.wins++; else target.losses++; }
+  const bot = PVP_BOTS.find(b => b.name === targetName);
+  if (bot) { bot.wins = target.wins; bot.losses = target.losses; saveBotData(); }
+  delete pvpOpponents[targetName];
+  saveGame();
+  showFightResult(target.name, won);
+  renderLeaderboard();
+}
+
+function showFightResult(name, won) {
+  const overlay = document.createElement('div');
+  overlay.className = 'pvp-result-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  const title = won ? t('pvpVictory') : t('pvpDefeat');
+  const text = won ? t('pvpWonAgainst', { name: escapeHtml(name) }) : t('pvpLostAgainst', { name: escapeHtml(name) });
+  const record = t('pvpRecord', { w: G.pvpWins, l: G.pvpLosses });
+  overlay.innerHTML = `<div class="pvp-result-box">
+    <div class="result-title">${title}</div>
+    <div class="result-text">${text}</div>
+    <div class="result-detail">${won ? t('pvpWinDetail') : t('pvpLossDetail')}</div>
+    <div class="result-record">${record}</div>
+    <button onclick="this.parentElement.parentElement.remove()">${t('close')}</button>
+  </div>`;
+  document.getElementById('app').appendChild(overlay);
+}
+
 function toggleChat() {
   chatOpen = !chatOpen;
   const panel = document.getElementById('chat-panel');
@@ -1214,6 +1588,7 @@ function toggleChat() {
   toggle.style.display = chatOpen ? 'none' : 'flex';
   if (chatOpen) {
     renderChatMessages();
+    renderLeaderboard();
     setTimeout(() => { document.getElementById('chat-input').focus(); }, 100);
   }
 }
@@ -1241,6 +1616,7 @@ function showStatsPopup(name, data) {
     popup.innerHTML = `<div style="text-align:center;padding:24px;color:#888;font-size:12px">${escapeHtml(name)} is offline</div>
       <div class="psp-close"><button onclick="document.getElementById('player-stats-popup').remove()">Close</button></div>`;
   } else {
+    if (data.name && data.online) pvpOpponents[data.name] = { icon:data.icon||'👨🏻', power:data.power||0, forgeLv:data.forgeLv||0, wave:data.wave||0 };
     let itemsHtml = '';
     if (data.equipped) {
       const slots = ['helmet','chestplate','gloves','belt','boots','weapon','amulet','ring'];
@@ -1270,17 +1646,24 @@ function showStatsPopup(name, data) {
         <div class="psp-stat span2"><div class="psp-label">Wave</div><div class="psp-value">${data.wave || 0}</div></div>
       </div>
       ${itemsHtml ? `<div class="psp-items"><div class="psp-items-title">Equipped Items</div>${itemsHtml}</div>` : ''}
-      <div class="psp-close"><button onclick="document.getElementById('player-stats-popup').remove()">Close</button></div>`;
+      <div class="psp-close">
+        <button onclick="fightPlayer('${escapeHtml(name)}')">${t('pvpFight')}</button>
+        <button onclick="document.getElementById('player-stats-popup').remove()">${t('close')}</button>
+      </div>`;
   }
   document.getElementById('app').appendChild(popup);
   popup.addEventListener('click', (e) => { if (e.target === popup) popup.remove(); });
 }
 
 function renderLang() {
-  document.getElementById('chat-header-title').textContent='💬 '+t('chat');
   document.getElementById('chat-send-btn').textContent=t('send');
   document.getElementById('chat-input').placeholder=t('msgPlaceholder');
   document.getElementById('connecting-msg').textContent=t('connecting');
+  document.getElementById('chat-tab-chat').textContent='💬 '+t('chat');
+  document.getElementById('chat-tab-pvp').textContent='⚔ '+t('pvpTab');
+  document.getElementById('skills-btn').textContent='🌳 '+t('skillTree');
+  const stTitle=document.getElementById('skill-popup-title');if(stTitle)stTitle.innerHTML='🌳 '+t('skillTree');
+  const sl=document.getElementById('skill-pts-label');if(sl)sl.textContent=t('skillPts');
   const gm=document.getElementById('gender-male');if(gm)gm.textContent='👨🏻 '+t('male');
   const gf=document.getElementById('gender-female');if(gf)gf.textContent='👩🏻 '+t('female');
   const gc=document.getElementById('gender-cat');if(gc)gc.textContent='🐱 '+t('cat');
