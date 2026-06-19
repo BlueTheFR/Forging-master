@@ -257,6 +257,7 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
       <div id="char-stats"></div>
       <button id="skills-btn" onclick="toggleSkills()">🌳 Skills</button>
     </div>
+    <button id="prestige-top-btn" onclick="doPrestige()" style="background:none;border:1px solid #f5c518;color:#f5c518;border-radius:4px;font-size:10px;padding:2px 6px;cursor:pointer;white-space:nowrap">⭐ <span id="prestige-top-pts">0</span></button>
     <div id="wave-display">Wave <span id="wave-num">1</span></div>
     <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
   </div>
@@ -856,6 +857,7 @@ function spawnEnemies(){
 }
 
 function updateMovement(dt){
+  dt=Math.min(dt,0.05); // cap per-frame to prevent overshoot at high game speed
   const stats=getCharacterStats();
   const isRanged=G.hasRanged;
   const alive=G.enemies.filter(e=>e.alive);
@@ -993,6 +995,8 @@ function render(){
   document.getElementById('char-name').textContent=G.playerName;
   document.getElementById('char-avatar').textContent=G.gender==='cat'?'🐱':(G.gender==='female'?'👩🏻':'👨🏻');
   document.getElementById('wave-num').textContent=G.wave;
+  const pt=document.getElementById('prestige-top-pts');if(pt)pt.textContent=G.prestigePoints;
+  const pb=document.getElementById('prestige-top-btn');if(pb){pb.disabled=G.wave<500;pb.title=G.wave<500?t('prestigeNeedWave')+' 500':''}
 
   const needed=forgeXpForLevel(G.forgeLv);
   document.getElementById('forge-lv-label').textContent=t('forgeLevel');
@@ -1197,10 +1201,10 @@ let lastTime=performance.now(),totalTime=0;
 function gameLoop(time){
   const dt=Math.min((time-lastTime)/1000,0.05);lastTime=time;
   const sdt=dt*G._gameSpeed;totalTime+=sdt;
-  if(G.forgeCooldown>0)G.forgeCooldown-=sdt;
+  if(G.forgeCooldown>0)G.forgeCooldown-=dt;
 
   if(G.isUpgrading){
-    G.upgradeTimeLeft-=sdt;
+    G.upgradeTimeLeft-=dt;
     if(G.upgradeTimeLeft<=0)completeUpgrade();
     const m=Math.floor(Math.max(0,G.upgradeTimeLeft)/60),s=Math.floor(Math.max(0,G.upgradeTimeLeft)%60);
     document.getElementById('upgrade-time').textContent=`${m}:${s.toString().padStart(2,'0')}`;
@@ -1213,8 +1217,8 @@ function gameLoop(time){
     if(p.progress>=1)G.projectiles.splice(i,1);
   }
 
-  // Auto-forge
-  if(G.autoForge)updateAutoForge(sdt);
+  // Auto-forge (real-time, not game-speed)
+  if(G.autoForge)updateAutoForge(dt);
 
   // Combat at ~20 Hz (based on game-time)
   if(Math.floor(totalTime*20)>Math.floor((totalTime-sdt)*20))combatTick(0.05*G._gameSpeed);
