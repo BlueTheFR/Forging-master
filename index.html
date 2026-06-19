@@ -365,10 +365,8 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
     <div class="stats-grid" id="stats-grid"></div>
     <div class="equip-list-popup" id="equip-list-popup"></div>
     <div style="display:flex;gap:6px;margin-top:8px">
-      <button id="prestige-btn" style="flex:1;padding:5px;background:linear-gradient(135deg,#f5c518,#e9a820);border:none;border-radius:4px;color:#111;font-size:11px;font-weight:600;cursor:pointer" onclick="doPrestige()">${t('prestige')}</button>
       <button style="flex:1;padding:5px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#e74c3c;font-size:11px;cursor:pointer" onclick="resetGame()">${t('resetConfirm')}</button>
     </div>
-    <div id="prestige-req" style="font-size:9px;color:#666;text-align:center;margin-top:4px"></div>
   </div>
 
   <!-- Skill Tree Popup -->
@@ -995,7 +993,7 @@ function render(){
   document.getElementById('char-name').textContent=G.playerName;
   document.getElementById('char-avatar').textContent=G.gender==='cat'?'🐱':(G.gender==='female'?'👩🏻':'👨🏻');
   document.getElementById('wave-num').textContent=G.wave;
-  const pt=document.getElementById('prestige-top-pts');if(pt)pt.textContent=G.prestigePoints;
+  const pt=document.getElementById('prestige-top-pts');if(pt){const gain=G.wave>=500?1+Math.floor((G.wave-500)/100):0;pt.textContent=G.prestigePoints+(gain>0?' (+'+gain+')':'')}
   const pb=document.getElementById('prestige-top-btn');if(pb){pb.disabled=G.wave<500;pb.title=G.wave<500?t('prestigeNeedWave')+' 500':''}
 
   const needed=forgeXpForLevel(G.forgeLv);
@@ -1192,8 +1190,6 @@ function renderStatsPopup(){
     }
     lc.appendChild(d);
   });
-  const pBtn=document.getElementById('prestige-btn'),pReq=document.getElementById('prestige-req');
-  if(pBtn){pBtn.disabled=G.wave<500;pBtn.style.opacity=pBtn.disabled?'0.5':'1';pReq.textContent=pBtn.disabled?t('prestigeNeedWave')+': 500 ('+t('wave')+' '+G.wave+')':''}
 }
 
 // ========== GAME LOOP ==========
@@ -1232,8 +1228,8 @@ function gameLoop(time){
 // ========== RESET ==========
 function doPrestige(){
   if(G.wave<500){alert(t('prestigeNeedWave')+' 500');return}
-  if(!confirm(t('prestigeConfirm')))return;
   const pts=1+Math.floor((G.wave-500)/100);
+  if(!confirm(t('prestigeConfirm')+' (+'+pts+' pts, total: '+(G.prestigePoints+pts)+')'))return;
   G.prestigePoints+=pts;
   G.wave=1;G.totalWavesCleared=0;
   G.enemies=[];G.projectiles=[];G.charHp=G.charMaxHp;
