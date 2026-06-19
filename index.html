@@ -721,9 +721,11 @@ function generateItem(){
   const pool=[...SUBSTATS];
   if((st.blockChance||0)>=75){const i=pool.findIndex(s=>s.id==='blockChance');if(i>=0)pool.splice(i,1)}
   if((st.evadeChance||0)>=75){const i=pool.findIndex(s=>s.id==='evadeChance');if(i>=0)pool.splice(i,1)}
-  for(let i=0;i<rarity.substats;i++){
+  if((st.lifestealChance||0)>=50){const i=pool.findIndex(s=>s.id==='lifestealChance');if(i>=0)pool.splice(i,1)}
+  const tgt=rarity.substats,scale=tgt/Math.min(tgt,pool.length);
+  for(let i=0;i<tgt;i++){
     if(!pool.length)break;const idx=randInt(0,pool.length-1),s=pool.splice(idx,1)[0];
-    const val=Math.round((s.suffix==='%'?rand(1,rarity.cap*100):rand(1,rarity.cap*100))*G._substatMult*10)/10;
+    const val=Math.round((s.suffix==='%'?rand(1,rarity.cap*100):rand(1,rarity.cap*100))*G._substatMult*scale*10)/10;
     item.substats.push({id:s.id,name:s.name,value:val,suffix:s.suffix});
   }
   item.power=getItemPower(item);return item;
