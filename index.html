@@ -363,6 +363,11 @@ body{color:#ddd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;displa
     </div>
     <div class="stats-grid" id="stats-grid"></div>
     <div class="equip-list-popup" id="equip-list-popup"></div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button id="prestige-btn" style="flex:1;padding:5px;background:linear-gradient(135deg,#f5c518,#e9a820);border:none;border-radius:4px;color:#111;font-size:11px;font-weight:600;cursor:pointer" onclick="doPrestige()">${t('prestige')}</button>
+      <button style="flex:1;padding:5px;background:rgba(255,255,255,.05);border:1px solid #2a2a4a;border-radius:4px;color:#e74c3c;font-size:11px;cursor:pointer" onclick="resetGame()">${t('resetConfirm')}</button>
+    </div>
+    <div id="prestige-req" style="font-size:9px;color:#666;text-align:center;margin-top:4px"></div>
   </div>
 
   <!-- Skill Tree Popup -->
@@ -463,17 +468,18 @@ const SKILL_TREE = [
   { id:'secondWind', cat:'defense', name:'Second Wind', desc:'Restore 3% max HP on kill per level', icon:'💚', maxLv:5, apply:lv=>G._killHealPct=lv*3 },
   // wave
   { id:'bountyHunter', cat:'wave', name:'Bounty Hunter', desc:'+1 forge XP per kill per level', icon:'💰', maxLv:5, apply:lv=>G._xpKillBonus=lv },
-  { id:'waveRunner', cat:'wave', name:'Wave Runner', desc:'+1 enemy per wave per level', icon:'🌊', maxLv:5, apply:lv=>G._waveBonus=lv },
   { id:'bossSlayer', cat:'wave', name:'Boss Slayer', desc:'+5% boss damage per level', icon:'🎯', maxLv:5, apply:lv=>G._bossDmgMult=1+lv*0.05 },
   { id:'survivalist', cat:'wave', name:'Survivalist', desc:'+5% wave XP per level', icon:'📖', maxLv:5, apply:lv=>G._waveXpMult=1+lv*0.05 },
-  { id:'overlord', cat:'wave', name:'Overlord', desc:'+1 enemy slot per level', icon:'👑', maxLv:5, apply:lv=>G._slotBonus=lv },
+  { id:'scavenger', cat:'wave', name:'Scavenger', desc:'+5% substat values per level', icon:'🎒', maxLv:5, apply:lv=>G._substatMult=1+lv*0.05 },
+  { id:'guardian', cat:'wave', name:'Guardian', desc:'+3% max HP per level', icon:'🏰', maxLv:5, apply:lv=>G._maxHpPctBonus=lv*3 },
+  { id:'turboMode', cat:'wave', name:'Turbo Mode', desc:'+1x game speed per level (10 pts each)', icon:'⏩', maxLv:4, cost:10, apply:lv=>G._gameSpeed=1+lv },
 ];
 
 function applySkills() {
   G._forgeCdBase=0.4;G._rarityMult=1;G._discardMult=1;G._itemLvBonus=0;G._doubleChance=0;
   G._dmgBonus=0;G._hpBonus=0;G._atkSpdBonus=0;G._comboBonus=0;G._lifestealBonus=0;
   G._armorBonus=0;G._blockBonus=0;G._evadeBonus=0;G._regenBonus=0;G._killHealPct=0;
-  G._xpKillBonus=0;G._waveBonus=0;G._bossDmgMult=1;G._waveXpMult=1;G._slotBonus=0;
+  G._xpKillBonus=0;G._bossDmgMult=1;G._waveXpMult=1;G._substatMult=1;G._maxHpPctBonus=0;G._gameSpeed=1;
   for (const sk of SKILL_TREE) {
     if (G.skills[sk.id]) sk.apply(G.skills[sk.id]);
   }
@@ -483,7 +489,7 @@ function recalcSkillPoints() {
   const earned = G.forgeLv + Math.floor(G.totalWavesCleared / 5);
   let spent = 0;
   for (const sk of SKILL_TREE) spent += G.skills[sk.id] || 0;
-  G.skillPoints = isAllMaxed() ? 0 : earned - spent;
+  G.skillPoints = isAllMaxed() ? 0 : Math.max(0, earned - spent);
 }
 const LANG_STRINGS = {
   en: {
@@ -528,6 +534,10 @@ const LANG_STRINGS = {
     pvpRecord:'Record: {w}W {l}L', pvpWinDetail:'✨ +1 Win', pvpLossDetail:'💔 +1 Loss',
     skillPts:'🌳 Skill Pts', skillTree:'Skill Tree',
     setBonus:'Set Bonus', setNone:'No Set Bonus',
+    prestige:'⭐ Prestige', prestigeCount:'Prestige', prestigeMult:'+5% all stats per prestige',
+    prestigeConfirm:'Reset wave to 1 and gain +1 prestige? You keep forge level, items, and skills.',
+    prestigeDesc:'Reset wave to 1. Gain +5% all stats permanently (stacking).',
+    prestigeNeedWave:'Need wave',
   },
   fr: {
     playerName:'Maître Forgeron', wave:'Vague', level:'Niveau', enemiesLeft:'ennemis restants', combatPower:'Puissance de Combat',
@@ -566,6 +576,10 @@ const LANG_STRINGS = {
     pvpRecord:'Palmarès: {w}V {l}D', pvpWinDetail:'✨ +1 Victoire', pvpLossDetail:'💔 +1 Défaite',
     skillPts:'🌳 Pts Compétence', skillTree:'Compétences',
     setBonus:'Bonus d\'Ensemble', setNone:'Aucun Bonus d\'Ensemble',
+    prestige:'⭐ Prestige', prestigeCount:'Prestige', prestigeMult:'+5% toutes les stats par prestige',
+    prestigeConfirm:'Réinitialiser la vague à 1 et gagner +1 prestige ? Vous gardez niveau de forge, objets et compétences.',
+    prestigeDesc:'Réinitialise la vague à 1. Gagnez +5% à toutes les stats en permanence (cumulable).',
+    prestigeNeedWave:'Vague requise',
   }
 };
 const LANG = (navigator.language||'').startsWith('fr')?'fr':'en';
@@ -613,12 +627,12 @@ let G = {
   playerName: 'Forging Master', gender: 'male',
   viewingSlot: null,
   pvpWins: 0, pvpLosses: 0,
-  skillPoints: 0,
+  skillPoints: 0, prestigePoints: 0,
   skills: {
     forgeSpeed:0, luckyStrike:0, efficientDiscard:0, itemBoost:0, doubleForge:0,
     powerTraining:0, endurance:0, swiftStrikes:0, comboMastery:0, vampiricTouch:0,
     armorCraft:0, blockMastery:0, evasion:0, regeneration:0, secondWind:0,
-    bountyHunter:0, waveRunner:0, bossSlayer:0, survivalist:0, overlord:0
+    bountyHunter:0, bossSlayer:0, survivalist:0, scavenger:0, guardian:0, turboMode:0
   },
 };
 
@@ -706,7 +720,7 @@ function generateItem(){
   const pool=[...SUBSTATS];
   for(let i=0;i<rarity.substats;i++){
     if(!pool.length)break;const idx=randInt(0,pool.length-1),s=pool.splice(idx,1)[0];
-    const val=s.suffix==='%'?Math.round(rand(1,rarity.cap*100)*10)/10:Math.round(rand(1,rarity.cap*100));
+    const val=Math.round((s.suffix==='%'?rand(1,rarity.cap*100):rand(1,rarity.cap*100))*G._substatMult*10)/10;
     item.substats.push({id:s.id,name:s.name,value:val,suffix:s.suffix});
   }
   item.power=getItemPower(item);return item;
@@ -721,6 +735,7 @@ function getCharacterStats(){
   G.hasRanged=false;
   for(const item of Object.values(G.equipped)){if(!item)continue;s.damage+=item.damage||0;s.hp+=item.hp||0;if(item.range)G.hasRanged=true;item.substats.forEach(x=>{if(s[x.id]!==undefined)s[x.id]+=x.value})}
   const set=getSetBonusInfo();if(set.pct>0){const m=1+set.pct/100;for(const k of Object.keys(s))s[k]=Math.round(s[k]*m*10)/10}
+  const pMult=1+G.prestigePoints*0.05;if(pMult>1)for(const k of Object.keys(s))s[k]=Math.round(s[k]*pMult*10)/10
   s.lifestealChance=Math.min(50,s.lifestealChance);
   return s;
 }
@@ -761,7 +776,7 @@ function clickSlot(s){
   G.viewingSlot=s;
   renderItemPreview();
 }
-function recalcCharHp(){const s=getCharacterStats();G.charMaxHp=Math.round(BASE_HP+s.hp);G.charHp=Math.min(G.charHp,G.charMaxHp)}
+function recalcCharHp(){const s=getCharacterStats();G.charMaxHp=Math.round((BASE_HP+s.hp)*(1+G._maxHpPctBonus/100));G.charHp=Math.min(G.charHp,G.charMaxHp)}
 
 // ========== AUTO FORGE ==========
 function toggleAutoForge(){
@@ -808,8 +823,8 @@ function initWave(){
   recalcSkillPoints();
   const isBoss=G.wave%10===0,isHorde=!isBoss&&G.wave%5===0;
   if(isBoss)G.enemiesThisWave=1;
-  else if(isHorde)G.enemiesThisWave=5+G._waveBonus+G._slotBonus;
-  else G.enemiesThisWave=Math.min(8,randInt(1,3)+G._waveBonus+G._slotBonus);
+  else if(isHorde)G.enemiesThisWave=5;
+  else G.enemiesThisWave=Math.min(8,randInt(1,3));
   G.enemiesRemaining=G.enemiesThisWave;
   G.playerX=15;
   spawnEnemies();
@@ -1153,6 +1168,9 @@ function renderStatsPopup(){
   const set=getSetBonusInfo();const sd=document.createElement('div');sd.className='stat-item';sd.style.cssText='display:flex;justify-content:space-between;padding:3px 8px;font-size:10px;background:rgba(245,197,24,.05);border-radius:4px;margin-top:4px';
   if(set.pct>0){const col=rarityColor(RARITIES[set.ri].name);sd.innerHTML=`<span class="label">${t('setBonus')}</span><span style="color:${col}">${tn(RARITIES[set.ri].name)} ${set.count}pc <strong>+${set.pct}%</strong></span>`}else{sd.innerHTML=`<span class="label">${t('setBonus')}</span><span style="color:#555">${t('setNone')}</span>`}
   grid.appendChild(sd);
+  const pd=document.createElement('div');pd.className='stat-item';pd.style.cssText='display:flex;justify-content:space-between;padding:3px 8px;font-size:10px;background:rgba(245,197,24,.05);border-radius:4px;margin-top:4px';
+  pd.innerHTML=`<span class="label">${t('prestigeCount')}</span><span style="color:#f5c518;font-weight:600">${G.prestigePoints} <span style="font-weight:400;color:#888;font-size:9px">${G.prestigePoints>0?'+'+G.prestigePoints*5+'%':''}</span></span>`;
+  grid.appendChild(pd);
   const lc=document.getElementById('equip-list-popup');lc.innerHTML='<div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;border-top:1px solid #2a2a4a;padding-top:8px">'+t('equippedItems')+'</div>';
   ITEM_TYPES.forEach(slot=>{
     const item=G.equipped[slot.id],d=document.createElement('div');
@@ -1170,16 +1188,19 @@ function renderStatsPopup(){
     }
     lc.appendChild(d);
   });
+  const pBtn=document.getElementById('prestige-btn'),pReq=document.getElementById('prestige-req');
+  if(pBtn){pBtn.disabled=G.wave<500;pBtn.style.opacity=pBtn.disabled?'0.5':'1';pReq.textContent=pBtn.disabled?t('prestigeNeedWave')+': 500 ('+t('wave')+' '+G.wave+')':''}
 }
 
 // ========== GAME LOOP ==========
 let lastTime=performance.now(),totalTime=0;
 function gameLoop(time){
-  const dt=Math.min((time-lastTime)/1000,0.05);lastTime=time;totalTime+=dt;
-  if(G.forgeCooldown>0)G.forgeCooldown-=dt;
+  const dt=Math.min((time-lastTime)/1000,0.05);lastTime=time;
+  const sdt=dt*G._gameSpeed;totalTime+=sdt;
+  if(G.forgeCooldown>0)G.forgeCooldown-=sdt;
 
   if(G.isUpgrading){
-    G.upgradeTimeLeft-=dt;
+    G.upgradeTimeLeft-=sdt;
     if(G.upgradeTimeLeft<=0)completeUpgrade();
     const m=Math.floor(Math.max(0,G.upgradeTimeLeft)/60),s=Math.floor(Math.max(0,G.upgradeTimeLeft)%60);
     document.getElementById('upgrade-time').textContent=`${m}:${s.toString().padStart(2,'0')}`;
@@ -1188,30 +1209,42 @@ function gameLoop(time){
   // Projectiles
   for(let i=G.projectiles.length-1;i>=0;i--){
     const p=G.projectiles[i];
-    p.progress+=p.speed*dt;
+    p.progress+=p.speed*sdt;
     if(p.progress>=1)G.projectiles.splice(i,1);
   }
 
   // Auto-forge
-  if(G.autoForge)updateAutoForge(dt);
+  if(G.autoForge)updateAutoForge(sdt);
 
-  // Combat at ~20 Hz for smoother movement
-  if(Math.floor(totalTime*20)>Math.floor((totalTime-dt)*20))combatTick(0.05);
+  // Combat at ~20 Hz (based on game-time)
+  if(Math.floor(totalTime*20)>Math.floor((totalTime-sdt)*20))combatTick(0.05*G._gameSpeed);
 
   // Render at ~30 Hz
-  if(Math.floor(totalTime*30)>Math.floor((totalTime-dt)*30))renderBattle();
+  if(Math.floor(totalTime*30)>Math.floor((totalTime-sdt)*30))renderBattle();
 
   requestAnimationFrame(gameLoop);
 }
 
 // ========== RESET ==========
+function doPrestige(){
+  if(G.wave<500){alert(t('prestigeNeedWave')+' 500');return}
+  if(!confirm(t('prestigeConfirm')))return;
+  const pts=1+Math.floor((G.wave-500)/100);
+  G.prestigePoints+=pts;
+  G.wave=1;G.totalWavesCleared=0;
+  G.enemies=[];G.projectiles=[];G.charHp=G.charMaxHp;
+  initWave();
+  G.log='⭐ +'+pts+' prestige!';
+  saveGame();render();renderItemPreview();
+  if(chatConnected)sendChatUpdate();
+}
 function resetGame(){
   if(!confirm(t('resetConfirm')))return;
   localStorage.removeItem('forgeMasterSave');
   G.forgeLv=1;G.forgeXp=0;G.isUpgrading=false;G.upgradeTimeLeft=0;G.currentItem=null;G.autoForge=false;G.autoForgeMinRarity=0;
   G.equipped={helmet:null,chestplate:null,gloves:null,belt:null,boots:null,weapon:null,amulet:null,ring:null,mount:null};
   G.wave=1;G.totalWavesCleared=0;G.charHp=BASE_HP;G.charMaxHp=BASE_HP;G.playerName='Forging Master';G.gender='male';
-  G.pvpWins=0;G.pvpLosses=0;
+  G.pvpWins=0;G.pvpLosses=0;G.prestigePoints=0;
   G.skillPoints=0;for(const k of Object.keys(G.skills))G.skills[k]=0;
   G.enemies=[];G.viewingSlot=null;
   recalcCharHp();initWave();render();renderItemPreview();
@@ -1221,12 +1254,12 @@ function resetGame(){
 
 // ========== SAVE/LOAD ==========
 function saveGame(){
-  const data={forgeLv:G.forgeLv,forgeXp:G.forgeXp,isUpgrading:G.isUpgrading,upgradeTimeLeft:G.upgradeTimeLeft,equipped:{},wave:G.wave,totalWavesCleared:G.totalWavesCleared,charHp:G.charHp,enemiesThisWave:G.enemiesThisWave,playerName:G.playerName,gender:G.gender,autoForgeMinRarity:G.autoForgeMinRarity,pvpWins:G.pvpWins,pvpLosses:G.pvpLosses,skills:{...G.skills}};
+  const data={forgeLv:G.forgeLv,forgeXp:G.forgeXp,isUpgrading:G.isUpgrading,upgradeTimeLeft:G.upgradeTimeLeft,equipped:{},wave:G.wave,totalWavesCleared:G.totalWavesCleared,charHp:G.charHp,enemiesThisWave:G.enemiesThisWave,playerName:G.playerName,gender:G.gender,autoForgeMinRarity:G.autoForgeMinRarity,pvpWins:G.pvpWins,pvpLosses:G.pvpLosses,prestigePoints:G.prestigePoints,skills:{...G.skills}};
   for(const[s,i]of Object.entries(G.equipped))data.equipped[s]=i?JSON.parse(JSON.stringify(i)):null;
   try{localStorage.setItem('forgeMasterSave',JSON.stringify(data))}catch(e){}
 }
 function loadGame(){
-  try{const raw=localStorage.getItem('forgeMasterSave');if(!raw)return false;const d=JSON.parse(raw);G.forgeLv=d.forgeLv||1;G.forgeXp=d.forgeXp||0;G.isUpgrading=d.isUpgrading||false;G.upgradeTimeLeft=d.upgradeTimeLeft||0;G.wave=d.wave||1;G.totalWavesCleared=d.totalWavesCleared||0;G.charHp=d.charHp||BASE_HP;G.enemiesThisWave=d.enemiesThisWave||1;if(d.equipped){for(const[s,i]of Object.entries(d.equipped))G.equipped[s]=i||null}if(d.playerName)G.playerName=d.playerName;if(d.gender)G.gender=d.gender;if(d.autoForgeMinRarity!==undefined)G.autoForgeMinRarity=d.autoForgeMinRarity;if(d.pvpWins!==undefined)G.pvpWins=d.pvpWins;if(d.pvpLosses!==undefined)G.pvpLosses=d.pvpLosses;if(d.skills)for(const[k,v]of Object.entries(d.skills))if(G.skills[k]!==undefined)G.skills[k]=v;return true}catch(e){return false}
+  try{const raw=localStorage.getItem('forgeMasterSave');if(!raw)return false;const d=JSON.parse(raw);G.forgeLv=d.forgeLv||1;G.forgeXp=d.forgeXp||0;G.isUpgrading=d.isUpgrading||false;G.upgradeTimeLeft=d.upgradeTimeLeft||0;G.wave=d.wave||1;G.totalWavesCleared=d.totalWavesCleared||0;G.charHp=d.charHp||BASE_HP;G.enemiesThisWave=d.enemiesThisWave||1;if(d.equipped){for(const[s,i]of Object.entries(d.equipped))G.equipped[s]=i||null}if(d.playerName)G.playerName=d.playerName;if(d.gender)G.gender=d.gender;if(d.autoForgeMinRarity!==undefined)G.autoForgeMinRarity=d.autoForgeMinRarity;if(d.pvpWins!==undefined)G.pvpWins=d.pvpWins;if(d.pvpLosses!==undefined)G.pvpLosses=d.pvpLosses;if(d.prestigePoints!==undefined)G.prestigePoints=d.prestigePoints;if(d.skills)for(const[k,v]of Object.entries(d.skills))if(G.skills[k]!==undefined)G.skills[k]=v;return true}catch(e){return false}
 }
 
 // ========== INIT ==========
@@ -1415,7 +1448,7 @@ function renderSkillTree() {
     for (const sk of skills) {
       const lv = G.skills[sk.id] || 0;
       const maxed = lv >= sk.maxLv;
-      const cost = 1;
+      const cost = sk.cost || 1;
       const canBuy = G.skillPoints >= cost && !maxed;
       const pct = (lv / sk.maxLv) * 100;
       const card = document.createElement('div');
@@ -1439,10 +1472,12 @@ function purchaseSkill(id) {
   const sk = SKILL_TREE.find(s => s.id === id);
   if (!sk) return;
   const lv = G.skills[id] || 0;
-  if (lv >= sk.maxLv || G.skillPoints < 1) return;
+  const cost = sk.cost || 1;
+  if (lv >= sk.maxLv || G.skillPoints < cost) return;
   G.skills[id] = lv + 1;
-  G.skillPoints--;
+  G.skillPoints -= cost;
   applySkills();
+  recalcCharHp();
   saveGame();
   render();
   renderItemPreview();
@@ -1501,7 +1536,8 @@ function renderLeaderboard() {
     const p = players[i];
     const ratio = (p.losses + p.wins) > 0 ? (p.wins / Math.max(1, p.losses)).toFixed(2) : '-';
     const isSelf = p.isSelf ? ' self' : '';
-    h += `<div class="pvp-lb-row${isSelf}">
+    const clickable = !p.isSelf ? ` onclick="fightPlayer('${escapeHtml(p.name).replace(/'/g, "\\'")}')" style="cursor:pointer"` : '';
+    h += `<div class="pvp-lb-row${isSelf}"${clickable}>
       <span class="pvp-lb-rank">${i + 1}</span>
       <span class="pvp-lb-icon">${p.icon}</span>
       <span class="pvp-lb-name">${escapeHtml(p.name)}</span>
@@ -1619,8 +1655,8 @@ function showStatsPopup(name, data) {
     if (data.name && data.online) pvpOpponents[data.name] = { icon:data.icon||'👨🏻', power:data.power||0, forgeLv:data.forgeLv||0, wave:data.wave||0 };
     let itemsHtml = '';
     if (data.equipped) {
-      const slots = ['helmet','chestplate','gloves','belt','boots','weapon','amulet','ring'];
-      const labels = { helmet:'🪖', chestplate:'🛡️', gloves:'🧤', belt:'🔗', boots:'👢', weapon:'⚔️', amulet:'📿', ring:'💍' };
+      const slots = ['helmet','chestplate','gloves','belt','boots','weapon','amulet','ring','mount'];
+      const labels = { helmet:'🪖', chestplate:'🛡️', gloves:'🧤', belt:'🔗', boots:'👢', weapon:'⚔️', amulet:'📿', ring:'💍', mount:'🐴' };
       for (const sl of slots) {
         const item = data.equipped[sl];
         if (!item) continue;
