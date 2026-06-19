@@ -453,6 +453,7 @@ const SKILL_TREE = [
   { id:'efficientDiscard', cat:'forge', name:'Efficient Discard', desc:'+10% forge XP from discarding per level', icon:'♻️', maxLv:5, apply:lv=>G._discardMult=1+lv*0.1 },
   { id:'itemBoost', cat:'forge', name:'Item Boost', desc:'+1 forged item level per 2 levels', icon:'📈', maxLv:5, apply:lv=>G._itemLvBonus=Math.floor(lv/2) },
   { id:'doubleForge', cat:'forge', name:'Double Forge', desc:'% double forge chance: 3/6/10/15/20%', icon:'✨', maxLv:5, apply:lv=>G._doubleChance=[0,3,6,10,15,20][lv] },
+  { id:'swiftUpgrade', cat:'forge', name:'Swift Upgrade', desc:'-10s forge upgrade time per level', icon:'⏬', maxLv:5, apply:lv=>G._upgradeTimeReduction=lv*10 },
   // combat
   { id:'powerTraining', cat:'combat', name:'Power Training', desc:'+1 base damage per level', icon:'💪', maxLv:5, apply:lv=>G._dmgBonus=lv },
   { id:'endurance', cat:'combat', name:'Endurance', desc:'+12 max HP per level', icon:'❤️', maxLv:5, apply:lv=>G._hpBonus=lv*12 },
@@ -475,7 +476,7 @@ const SKILL_TREE = [
 ];
 
 function applySkills() {
-  G._forgeCdBase=0.4;G._rarityMult=1;G._discardMult=1;G._itemLvBonus=0;G._doubleChance=0;
+  G._forgeCdBase=0.4;G._rarityMult=1;G._discardMult=1;G._itemLvBonus=0;G._doubleChance=0;G._upgradeTimeReduction=0;
   G._dmgBonus=0;G._hpBonus=0;G._atkSpdBonus=0;G._comboBonus=0;G._lifestealBonus=0;
   G._armorBonus=0;G._blockBonus=0;G._evadeBonus=0;G._regenBonus=0;G._killHealPct=0;
   G._xpKillBonus=0;G._bossDmgMult=1;G._waveXpMult=1;G._substatMult=1;G._maxHpPctBonus=0;G._gameSpeed=1;
@@ -628,7 +629,7 @@ let G = {
   pvpWins: 0, pvpLosses: 0,
   skillPoints: 0, prestigePoints: 0,
   skills: {
-    forgeSpeed:0, luckyStrike:0, efficientDiscard:0, itemBoost:0, doubleForge:0,
+    forgeSpeed:0, luckyStrike:0, efficientDiscard:0, itemBoost:0, doubleForge:0, swiftUpgrade:0,
     powerTraining:0, endurance:0, swiftStrikes:0, comboMastery:0, vampiricTouch:0,
     armorCraft:0, blockMastery:0, evasion:0, regeneration:0, secondWind:0,
     bountyHunter:0, bossSlayer:0, survivalist:0, scavenger:0, guardian:0, turboMode:0
@@ -767,7 +768,7 @@ function addForgeXp(item){const a=Math.round((Math.max(2,Math.floor(getItemPower
 function isAllMaxed(){if(G.forgeLv<MAX_FORGE_LV)return false;for(const sk of SKILL_TREE)if((G.skills[sk.id]||0)<sk.maxLv)return false;return true}
 function addRawForgeXp(amount){if(isAllMaxed())return;if(G.forgeLv>=MAX_FORGE_LV){G.forgeXp+=amount;const pts=Math.floor(G.forgeXp/1000);if(pts>0){G.skillPoints+=pts;G.forgeXp-=pts*1000}}else{G.forgeXp+=amount}}
 const MAX_FORGE_LV = 50;
-function startUpgrade(){if(G.isUpgrading||G.forgeLv>=MAX_FORGE_LV)return;const n=forgeXpForLevel(G.forgeLv);if(G.forgeXp<n)return;G.forgeXp-=n;G.isUpgrading=true;G.upgradeTimeLeft=getUpgradeTime(G.forgeLv);render()}
+function startUpgrade(){if(G.isUpgrading||G.forgeLv>=MAX_FORGE_LV)return;const n=forgeXpForLevel(G.forgeLv);if(G.forgeXp<n)return;G.forgeXp-=n;G.isUpgrading=true;G.upgradeTimeLeft=Math.max(5,getUpgradeTime(G.forgeLv)-G._upgradeTimeReduction);render()}
 function completeUpgrade(){G.forgeLv++;G.isUpgrading=false;G.upgradeTimeLeft=0;if(!isAllMaxed())G.skillPoints++;applySkills();render();if(G.autoForge){G.autoForge=false;render()}}
 function unequipSlot(s){if(!G.equipped[s])return;addForgeXp(G.equipped[s]);G.equipped[s]=null;recalcCharHp();render();if(chatConnected)sendChatUpdate()}
 function clickSlot(s){
