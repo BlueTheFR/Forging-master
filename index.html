@@ -452,7 +452,7 @@ const SKILL_TREE = [
   { id:'luckyStrike', cat:'forge', name:'Lucky Strike', desc:'+3% rare+ probability per level', icon:'🍀', maxLv:5, apply:lv=>G._rarityMult=1+lv*0.03 },
   { id:'efficientDiscard', cat:'forge', name:'Efficient Discard', desc:'+10% forge XP from discarding per level', icon:'♻️', maxLv:5, apply:lv=>G._discardMult=1+lv*0.1 },
   { id:'itemBoost', cat:'forge', name:'Item Boost', desc:'+1 forged item level per 2 levels', icon:'📈', maxLv:5, apply:lv=>G._itemLvBonus=Math.floor(lv/2) },
-  { id:'doubleForge', cat:'forge', name:'Double Forge', desc:'% double forge chance: 3/6/10/15/20%', icon:'✨', maxLv:5, apply:lv=>G._doubleChance=[0,3,6,10,15,20][lv] },
+  { id:'doubleForge', cat:'forge', name:'Multi Forge', desc:'2×→100% 3×→75% 4×→50% 5×→25% at lv10', icon:'✨', maxLv:10, apply:lv=>{G._doubleChance=Math.min(100,lv*10);G._tripleChance=Math.min(75,lv*7.5);G._quadChance=Math.min(50,lv*5);G._quintChance=Math.min(25,lv*2.5)} },
   { id:'swiftUpgrade', cat:'forge', name:'Swift Upgrade', desc:'-10s forge upgrade time per level', icon:'⏬', maxLv:5, apply:lv=>G._upgradeTimeReduction=lv*10 },
   // combat
   { id:'powerTraining', cat:'combat', name:'Power Training', desc:'+1 base damage per level', icon:'💪', maxLv:5, apply:lv=>G._dmgBonus=lv },
@@ -476,7 +476,7 @@ const SKILL_TREE = [
 ];
 
 function applySkills() {
-  G._forgeCdBase=0.4;G._rarityMult=1;G._discardMult=1;G._itemLvBonus=0;G._doubleChance=0;G._upgradeTimeReduction=0;
+  G._forgeCdBase=0.4;G._rarityMult=1;G._discardMult=1;G._itemLvBonus=0;G._doubleChance=0;G._tripleChance=0;G._quadChance=0;G._quintChance=0;G._upgradeTimeReduction=0;
   G._dmgBonus=0;G._hpBonus=0;G._atkSpdBonus=0;G._comboBonus=0;G._lifestealBonus=0;
   G._armorBonus=0;G._blockBonus=0;G._evadeBonus=0;G._regenBonus=0;G._killHealPct=0;
   G._xpKillBonus=0;G._bossDmgMult=1;G._waveXpMult=1;G._substatMult=1;G._maxHpPctBonus=0;G._gameSpeed=1;
@@ -717,7 +717,10 @@ function generateItem(){
   } else {
     item.hp=Math.round(itemLv*BASE_ITEM_HP*(0.8+(ri+1)*0.15));
   }
+  const st=getCharacterStats();
   const pool=[...SUBSTATS];
+  if((st.blockChance||0)>=75){const i=pool.findIndex(s=>s.id==='blockChance');if(i>=0)pool.splice(i,1)}
+  if((st.evadeChance||0)>=75){const i=pool.findIndex(s=>s.id==='evadeChance');if(i>=0)pool.splice(i,1)}
   for(let i=0;i<rarity.substats;i++){
     if(!pool.length)break;const idx=randInt(0,pool.length-1),s=pool.splice(idx,1)[0];
     const val=Math.round((s.suffix==='%'?rand(1,rarity.cap*100):rand(1,rarity.cap*100))*G._substatMult*10)/10;
@@ -737,6 +740,7 @@ function getCharacterStats(){
   const set=getSetBonusInfo();if(set.pct>0){const m=1+set.pct/100;for(const k of Object.keys(s))s[k]=Math.round(s[k]*m*10)/10}
   const pMult=1+G.prestigePoints*0.05;if(pMult>1)for(const k of Object.keys(s))s[k]=Math.round(s[k]*pMult*10)/10
   s.lifestealChance=Math.min(50,s.lifestealChance);
+  s.blockChance=Math.min(75,s.blockChance);s.evadeChance=Math.min(75,s.evadeChance);
   return s;
 }
 
@@ -761,7 +765,8 @@ function getMobStats(statMult=1){
 }
 
 // ========== CORE GAME LOGIC ==========
-function forgeItem(){if(G.isUpgrading||G.forgeCooldown>0)return;G.forgeCooldown=G._forgeCdBase;G.currentItem=generateItem();if(G._doubleChance>0&&Math.random()*100<G._doubleChance){const d=generateItem();if(d.power>G.currentItem.power)G.currentItem=d}renderItemPreview();render()}
+function rollForgeMult(){const qn=G._quintChance;if(qn>0&&Math.random()*100<qn)return 5;const qd=G._quadChance;if(qd>0&&Math.random()*100<qd)return 4;const tp=G._tripleChance;if(tp>0&&Math.random()*100<tp)return 3;const db=G._doubleChance;if(db>0&&Math.random()*100<db)return 2;return 1}
+function forgeItem(){if(G.isUpgrading||G.forgeCooldown>0)return;G.forgeCooldown=G._forgeCdBase;G.currentItem=generateItem();const mult=rollForgeMult();for(let i=1;i<mult;i++){const d=generateItem();if(d.power>G.currentItem.power)G.currentItem=d}renderItemPreview();render()}
 function equipCurrentItem(){if(!G.currentItem)return;const s=G.currentItem.type;if(G.equipped[s])addForgeXp(G.equipped[s]);G.equipped[s]=G.currentItem;G.currentItem=null;recalcCharHp();renderItemPreview();render();if(chatConnected)sendChatUpdate()}
 function discardCurrentItem(){if(!G.currentItem)return;addForgeXp(G.currentItem);G.currentItem=null;renderItemPreview();render()}
 function addForgeXp(item){const a=Math.round((Math.max(2,Math.floor(getItemPower(item)/2)+2+item.rarityIndex*3))*G._discardMult);addRawForgeXp(a);render()}
