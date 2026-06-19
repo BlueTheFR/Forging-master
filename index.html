@@ -742,6 +742,7 @@ function getCharacterStats(){
 function getItemMainStat(item){if(!item)return{label:'',value:0};if(item.weaponStyle){const wsl=item.weaponStyle==='ranged'?t('ranged'):t('melee');return{label:item.weaponStyle==='ranged'?'🏹 '+wsl:'⚔ '+wsl,value:item.damage}}return{label:'❤ '+t('hp'),value:item.hp}}
 
 function getTotalItemPower(){let t=0;for(const s of Object.values(G.equipped))if(s)t+=getItemPower(s);return t}
+function getCombatPower(){const b=getTotalItemPower()+BASE_DAMAGE;const s=getSetBonusInfo();let m=1;if(s.pct>0)m*=1+s.pct/100;m*=1+G.prestigePoints*0.05;return Math.round(b*m)}
 
 function getMobStats(statMult=1){
   const w=G.wave,baseHp=25+w*2.5,baseDmg=4+w*1.0,hpMult=1+w/20,dmgMult=1+w/30;
@@ -1021,7 +1022,7 @@ function render(){
 
   document.getElementById('enemy-counter').textContent=G.enemiesRemaining>1?`${G.enemiesRemaining} ${t('enemiesLeft')}`:'';
 
-  const combatPower=getTotalItemPower()+BASE_DAMAGE;
+  const combatPower=getCombatPower();
   document.getElementById('char-stats').textContent=t('combatPower')+`: ${combatPower}`;
 }
 
@@ -1164,7 +1165,7 @@ function renderStatsPopup(){
   document.getElementById('name-input').value=G.playerName;
   document.getElementById('gender-select').value=G.gender;
   const stats=getCharacterStats(),grid=document.getElementById('stats-grid');grid.innerHTML='';
-  const combatPower=getTotalItemPower()+BASE_DAMAGE;
+  const combatPower=getCombatPower();
   const e=[{label:t('labelCombatPower'),value:combatPower,suffix:''},{label:t('skillPts'),value:G.skillPoints,suffix:''},{label:t('statAtk'),value:stats.damage,suffix:''},{label:t('statBonusDmg'),value:stats.bonusDamage,suffix:''},{label:t('statMaxHp'),value:G.charMaxHp,suffix:''},{label:t('statArmorHp'),value:stats.hp,suffix:''},{label:t('statHpRegen'),value:(1+(stats.hpRegen||0)).toFixed(1),suffix:'/s'},{label:t('statAtkSpd'),value:stats.attackSpeed.toFixed(1),suffix:'%'},{label:t('statCombo'),value:stats.comboChance.toFixed(1),suffix:'%'},{label:t('statLifesteal'),value:stats.lifestealChance.toFixed(1),suffix:'%'},{label:t('statBlock'),value:stats.blockChance.toFixed(1),suffix:'%'},{label:t('statEvade'),value:stats.evadeChance.toFixed(1),suffix:'%'},{label:t('statItemPower'),value:getTotalItemPower(),suffix:''}];
   e.forEach(x=>{const d=document.createElement('div');d.className='stat-item';d.innerHTML=`<span class="label">${x.label}</span><span class="value">${x.value}${x.suffix}</span>`;grid.appendChild(d)});
   const set=getSetBonusInfo();const sd=document.createElement('div');sd.className='stat-item';sd.style.cssText='display:flex;justify-content:space-between;padding:3px 8px;font-size:10px;background:rgba(245,197,24,.05);border-radius:4px;margin-top:4px';
@@ -1334,7 +1335,7 @@ function scheduleReconnect() {
 
 function sendJoin() {
   if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) return;
-  const power = getTotalItemPower() + BASE_DAMAGE;
+  const power = getCombatPower();
   chatSocket.send(JSON.stringify({
     type: 'join',
     name: G.playerName || 'Forging Master',
@@ -1348,7 +1349,7 @@ function sendJoin() {
 
 function sendChatUpdate() {
   if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) return;
-  const power = getTotalItemPower() + BASE_DAMAGE;
+  const power = getCombatPower();
   chatSocket.send(JSON.stringify({
     type: 'update',
     data: {
@@ -1495,7 +1496,7 @@ function switchChatTab(tab) {
 
 function getAllPvpPlayers() {
   const players = [];
-  const selfPower = getTotalItemPower() + BASE_DAMAGE;
+  const selfPower = getCombatPower();
   players.push({
     name: G.playerName || 'Forging Master',
     icon: G.gender === 'cat' ? '🐱' : (G.gender === 'female' ? '👩🏻' : '👨🏻'),
@@ -1581,15 +1582,10 @@ function fightPlayer(targetName) {
     target = { name: targetName, icon: opp.icon, power: opp.power, forgeLv: opp.forgeLv, wave: opp.wave, wins: 0, losses: 0, isSelf: false };
   }
   if (!target) return;
-  const selfPower = getTotalItemPower() + BASE_DAMAGE;
-  const selfRating = selfPower + G.forgeLv * 0.5 + G.wave * 0.3;
-  const targetRating = target.power + target.forgeLv * 0.5 + target.wave * 0.3;
-  const total = selfRating + targetRating;
-  const selfChance = total > 0 ? selfRating / total : 0.5;
-  const roll = Math.random();
-  const won = roll < selfChance;
+  const selfPower = getCombatPower();
+  const won = selfPower >= target.power;
   if (won) { G.pvpWins++; } else { G.pvpLosses++; }
-  if (!target.isSelf) { if (won) target.wins++; else target.losses++; }
+  if (!target.isSelf) { if (won) target.losses++; else target.wins++; }
   const bot = PVP_BOTS.find(b => b.name === targetName);
   if (bot) { bot.wins = target.wins; bot.losses = target.losses; saveBotData(); }
   delete pvpOpponents[targetName];
